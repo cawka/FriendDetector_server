@@ -8,12 +8,13 @@ Faces RecognizerI::findFacesAndRecognizePeople( const pair<const Byte*, const By
 	return vector<Face>();
 }
 
-Faces RecognizerI::recognizePeople( const Files&, const Current& )
+Faces RecognizerI::recognizeFace( const pair<const Byte*, const Byte*>& jpegFileOfFace, const Current& )
 {
 	return vector<Face>();
 }
 
-void RecognizerI::learn( const Faces&, const Current& )
+void RecognizerI::learn( const pair<const Byte*, const Byte*>& jpegFileOfFace,
+	   const string &name,	const Current& )
 {
 }
 

@@ -180,33 +180,33 @@ private:
     
 public:
 
-    ::FriendDetector::Faces recognizePeople(const ::FriendDetector::Files& listOfJpegFiles)
+    ::FriendDetector::Faces recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace)
     {
-        return recognizePeople(listOfJpegFiles, 0);
+        return recognizeFace(jpegFileOfFace, 0);
     }
-    ::FriendDetector::Faces recognizePeople(const ::FriendDetector::Files& listOfJpegFiles, const ::Ice::Context& __ctx)
+    ::FriendDetector::Faces recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace, const ::Ice::Context& __ctx)
     {
-        return recognizePeople(listOfJpegFiles, &__ctx);
+        return recognizeFace(jpegFileOfFace, &__ctx);
     }
     
 private:
 
-    ::FriendDetector::Faces recognizePeople(const ::FriendDetector::Files&, const ::Ice::Context*);
+    ::FriendDetector::Faces recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
     
 public:
 
-    void learn(const ::FriendDetector::Faces& listOfFacesToLearn)
+    void learn(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace, const ::std::string& name)
     {
-        learn(listOfFacesToLearn, 0);
+        learn(jpegFileOfFace, name, 0);
     }
-    void learn(const ::FriendDetector::Faces& listOfFacesToLearn, const ::Ice::Context& __ctx)
+    void learn(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace, const ::std::string& name, const ::Ice::Context& __ctx)
     {
-        learn(listOfFacesToLearn, &__ctx);
+        learn(jpegFileOfFace, name, &__ctx);
     }
     
 private:
 
-    void learn(const ::FriendDetector::Faces&, const ::Ice::Context*);
+    void learn(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::std::string&, const ::Ice::Context*);
     
 public:
     
@@ -425,9 +425,9 @@ public:
 
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*) = 0;
 
-    virtual ::FriendDetector::Faces recognizePeople(const ::FriendDetector::Files&, const ::Ice::Context*) = 0;
+    virtual ::FriendDetector::Faces recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*) = 0;
 
-    virtual void learn(const ::FriendDetector::Faces&, const ::Ice::Context*) = 0;
+    virtual void learn(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::std::string&, const ::Ice::Context*) = 0;
 };
 
 }
@@ -447,9 +447,9 @@ public:
 
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
 
-    virtual ::FriendDetector::Faces recognizePeople(const ::FriendDetector::Files&, const ::Ice::Context*);
+    virtual ::FriendDetector::Faces recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
 
-    virtual void learn(const ::FriendDetector::Faces&, const ::Ice::Context*);
+    virtual void learn(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::std::string&, const ::Ice::Context*);
 };
 
 }
@@ -469,9 +469,9 @@ public:
 
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
 
-    virtual ::FriendDetector::Faces recognizePeople(const ::FriendDetector::Files&, const ::Ice::Context*);
+    virtual ::FriendDetector::Faces recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
 
-    virtual void learn(const ::FriendDetector::Faces&, const ::Ice::Context*);
+    virtual void learn(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::std::string&, const ::Ice::Context*);
 };
 
 }
@@ -498,10 +498,10 @@ public:
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Current& = ::Ice::Current()) = 0;
     ::Ice::DispatchStatus ___findFacesAndRecognizePeople(::IceInternal::Incoming&, const ::Ice::Current&);
 
-    virtual ::FriendDetector::Faces recognizePeople(const ::FriendDetector::Files&, const ::Ice::Current& = ::Ice::Current()) = 0;
-    ::Ice::DispatchStatus ___recognizePeople(::IceInternal::Incoming&, const ::Ice::Current&);
+    virtual ::FriendDetector::Faces recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Current& = ::Ice::Current()) = 0;
+    ::Ice::DispatchStatus ___recognizeFace(::IceInternal::Incoming&, const ::Ice::Current&);
 
-    virtual void learn(const ::FriendDetector::Faces&, const ::Ice::Current& = ::Ice::Current()) = 0;
+    virtual void learn(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::std::string&, const ::Ice::Current& = ::Ice::Current()) = 0;
     ::Ice::DispatchStatus ___learn(::IceInternal::Incoming&, const ::Ice::Current&);
 
     virtual ::Ice::DispatchStatus __dispatch(::IceInternal::Incoming&, const ::Ice::Current&);
