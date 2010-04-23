@@ -28,14 +28,18 @@ if not _M_FriendDetector.__dict__.has_key('_t_Files'):
 if not _M_FriendDetector.__dict__.has_key('FacePosition'):
     _M_FriendDetector.FacePosition = Ice.createTempClass()
     class FacePosition(object):
-        def __init__(self, left=0, top=0):
+        def __init__(self, left=0, top=0, right=0, bottom=0):
             self.left = left
             self.top = top
+            self.right = right
+            self.bottom = bottom
 
         def __hash__(self):
             _h = 0
             _h = 5 * _h + __builtin__.hash(self.left)
             _h = 5 * _h + __builtin__.hash(self.top)
+            _h = 5 * _h + __builtin__.hash(self.right)
+            _h = 5 * _h + __builtin__.hash(self.bottom)
             return _h % 0x7fffffff
 
         def __cmp__(self, other):
@@ -49,6 +53,14 @@ if not _M_FriendDetector.__dict__.has_key('FacePosition'):
                 return -1
             elif self.top > other.top:
                 return 1
+            if self.right < other.right:
+                return -1
+            elif self.right > other.right:
+                return 1
+            if self.bottom < other.bottom:
+                return -1
+            elif self.bottom > other.bottom:
+                return 1
             return 0
 
         def __str__(self):
@@ -58,7 +70,9 @@ if not _M_FriendDetector.__dict__.has_key('FacePosition'):
 
     _M_FriendDetector._t_FacePosition = IcePy.defineStruct('::FriendDetector::FacePosition', FacePosition, (), (
         ('left', (), IcePy._t_int),
-        ('top', (), IcePy._t_int)
+        ('top', (), IcePy._t_int),
+        ('right', (), IcePy._t_int),
+        ('bottom', (), IcePy._t_int)
     ))
 
     _M_FriendDetector.FacePosition = FacePosition
