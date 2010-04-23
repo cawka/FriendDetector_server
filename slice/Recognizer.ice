@@ -27,7 +27,7 @@
  	{
  		Faces findFacesAndRecognizePeople( ["cpp:array"] File jpegFile );
  		
- 		Faces recognizeFace( ["cpp:array"] File jpegFileOfFace );
+ 		Face recognizeFace( ["cpp:array"] File jpegFileOfFace );
  		
  		void learn( ["cpp:array"] File jpegFileOfFace, string name );
  	};

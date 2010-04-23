@@ -13,7 +13,7 @@ public:
     virtual Faces findFacesAndRecognizePeople( const pair<const Byte*, const Byte*> &jpegFile,
 										       const Current& = Current());
 
-    virtual Faces recognizeFace( const pair<const Byte*, const Byte*>& jpegFileOfFace, 
+    virtual Face recognizeFace( const pair<const Byte*, const Byte*>& jpegFileOfFace, 
 								 const Current& = Current());
 
     virtual void learn( const pair<const Byte*, const Byte*>& jpegFileOfFace, 

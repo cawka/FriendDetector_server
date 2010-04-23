@@ -312,7 +312,7 @@ IceProxy::FriendDetector::Recognizer::findFacesAndRecognizePeople(const ::std::p
     }
 }
 
-::FriendDetector::Faces
+::FriendDetector::Face
 IceProxy::FriendDetector::Recognizer::recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace, const ::Ice::Context* __ctx)
 {
     int __cnt = 0;
@@ -433,7 +433,7 @@ IceDelegateM::FriendDetector::Recognizer::findFacesAndRecognizePeople(const ::st
     }
 }
 
-::FriendDetector::Faces
+::FriendDetector::Face
 IceDelegateM::FriendDetector::Recognizer::recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace, const ::Ice::Context* __context)
 {
     ::IceInternal::Outgoing __og(__handler.get(), __FriendDetector__Recognizer__recognizeFace_name, ::Ice::Normal, __context);
@@ -447,7 +447,7 @@ IceDelegateM::FriendDetector::Recognizer::recognizeFace(const ::std::pair<const 
         __og.abort(__ex);
     }
     bool __ok = __og.invoke();
-    ::FriendDetector::Faces __ret;
+    ::FriendDetector::Face __ret;
     try
     {
         if(!__ok)
@@ -464,7 +464,7 @@ IceDelegateM::FriendDetector::Recognizer::recognizeFace(const ::std::pair<const 
         }
         ::IceInternal::BasicStream* __is = __og.is();
         __is->startReadEncaps();
-        ::FriendDetector::__readFaces(__is, __ret);
+        __ret.__read(__is);
         __is->endReadEncaps();
         return __ret;
     }
@@ -582,14 +582,14 @@ IceDelegateD::FriendDetector::Recognizer::findFacesAndRecognizePeople(const ::st
     return __result;
 }
 
-::FriendDetector::Faces
+::FriendDetector::Face
 IceDelegateD::FriendDetector::Recognizer::recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace, const ::Ice::Context* __context)
 {
     class _DirectI : public ::IceInternal::Direct
     {
     public:
 
-        _DirectI(::FriendDetector::Faces& __result, const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace, const ::Ice::Current& __current) : 
+        _DirectI(::FriendDetector::Face& __result, const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace, const ::Ice::Current& __current) : 
             ::IceInternal::Direct(__current),
             _result(__result),
             _m_jpegFileOfFace(jpegFileOfFace)
@@ -610,13 +610,13 @@ IceDelegateD::FriendDetector::Recognizer::recognizeFace(const ::std::pair<const 
         
     private:
         
-        ::FriendDetector::Faces& _result;
+        ::FriendDetector::Face& _result;
         const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& _m_jpegFileOfFace;
     };
     
     ::Ice::Current __current;
     __initCurrent(__current, __FriendDetector__Recognizer__recognizeFace_name, ::Ice::Normal, __context);
-    ::FriendDetector::Faces __result;
+    ::FriendDetector::Face __result;
     try
     {
         _DirectI __direct(__result, jpegFileOfFace, __current);
@@ -785,15 +785,8 @@ FriendDetector::Recognizer::___recognizeFace(::IceInternal::Incoming& __inS, con
     __is->read(jpegFileOfFace);
     __is->endReadEncaps();
     ::IceInternal::BasicStream* __os = __inS.os();
-    ::FriendDetector::Faces __ret = recognizeFace(jpegFileOfFace, __current);
-    if(__ret.size() == 0)
-    {
-        __os->writeSize(0);
-    }
-    else
-    {
-        ::FriendDetector::__writeFaces(__os, &__ret[0], &__ret[0] + __ret.size());
-    }
+    ::FriendDetector::Face __ret = recognizeFace(jpegFileOfFace, __current);
+    __ret.__write(__os);
     return ::Ice::DispatchOK;
 }
 
