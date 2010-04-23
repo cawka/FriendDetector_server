@@ -10,14 +10,10 @@ class Server( Ice.Application ):
 		adapter=self.communicator().\
 				createObjectAdapterWithEndpoints( "FriendDetector", "default -p 55436" )
 
-		#RecognizerI._adapter=adapter
-		# RecognizerI._adapter=adapter
-
 		servant=RecognizerI( )
 
 		identity=Ice.Identity( )
 		identity.name="FaceDetector"
-#		identity.name=Ice.generateUUID()
 
 		adapter.add( servant, identity )
 

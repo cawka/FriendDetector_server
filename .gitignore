@@ -1,2 +1,13 @@
 *.pyc
 .DS_*
+*.log
+*.o
+src/server
+
+Makefile.in
+aclocal.m4
+autom4te.cache/
+config.h.in
+stamp-h1
+src/.deps
+

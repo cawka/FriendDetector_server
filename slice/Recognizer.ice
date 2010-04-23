@@ -3,7 +3,7 @@
  {
  	sequence<byte> File;
  	
- 	sequence<File> Files;
+ 	sequence<File > Files;
  	
  	struct FacePosition
  	{
@@ -25,7 +25,7 @@
  
  	interface Recognizer
  	{
- 		Faces findFacesAndRecognizePeople( File jpegFile );
+ 		Faces findFacesAndRecognizePeople( ["cpp:array"] File jpegFile );
  		
  		Faces recognizePeople( Files listOfJpegFiles );
  		
