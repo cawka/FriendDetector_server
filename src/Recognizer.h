@@ -180,18 +180,18 @@ private:
     
 public:
 
-    ::FriendDetector::Face recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace)
+    ::std::string recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace)
     {
         return recognizeFace(jpegFileOfFace, 0);
     }
-    ::FriendDetector::Face recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace, const ::Ice::Context& __ctx)
+    ::std::string recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>& jpegFileOfFace, const ::Ice::Context& __ctx)
     {
         return recognizeFace(jpegFileOfFace, &__ctx);
     }
     
 private:
 
-    ::FriendDetector::Face recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
+    ::std::string recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
     
 public:
 
@@ -425,7 +425,7 @@ public:
 
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*) = 0;
 
-    virtual ::FriendDetector::Face recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*) = 0;
+    virtual ::std::string recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*) = 0;
 
     virtual void learn(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::std::string&, const ::Ice::Context*) = 0;
 };
@@ -447,7 +447,7 @@ public:
 
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
 
-    virtual ::FriendDetector::Face recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
+    virtual ::std::string recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
 
     virtual void learn(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::std::string&, const ::Ice::Context*);
 };
@@ -469,7 +469,7 @@ public:
 
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
 
-    virtual ::FriendDetector::Face recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
+    virtual ::std::string recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Context*);
 
     virtual void learn(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::std::string&, const ::Ice::Context*);
 };
@@ -498,7 +498,7 @@ public:
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Current& = ::Ice::Current()) = 0;
     ::Ice::DispatchStatus ___findFacesAndRecognizePeople(::IceInternal::Incoming&, const ::Ice::Current&);
 
-    virtual ::FriendDetector::Face recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Current& = ::Ice::Current()) = 0;
+    virtual ::std::string recognizeFace(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::Ice::Current& = ::Ice::Current()) = 0;
     ::Ice::DispatchStatus ___recognizeFace(::IceInternal::Incoming&, const ::Ice::Current&);
 
     virtual void learn(const ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&, const ::std::string&, const ::Ice::Current& = ::Ice::Current()) = 0;

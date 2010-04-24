@@ -3,9 +3,14 @@ bin_PROGRAMS=server
 
 server_SOURCES=Recognizer.cpp Recognizer.h \
 			   RecognizerI.cpp RecognizerI.h \
-			   eigenface.cpp\
+			   iFaceIdentifier.h \
+			   EigenFace.h EigenFace.cpp \
 			   main.cpp
 
-server_LDFLAGS=$(LDFLAGS) $(OPENCV_LIB) $(OPENCV_EXTRA) -lIce -lIceUtil -lcv -lcvaux 
-server_CPPFLAGS=$(CPPFLAGS) $(OPENCV_INCLUDE) -I. 
+
+server_LDFLAGS=$(LDFLAGS) \
+			   $(ICE_LIB) $(ICE_EXTRA) -lIce -lIceUtil \
+			   $(OPENCV_LIB) -lcxcore -lcv -lcvaux -lhighgui 
+
+server_CPPFLAGS=$(CPPFLAGS) $(ICE_INCLUDE) $(OPENCV_INCLUDE) -I. 
 

@@ -23,21 +23,29 @@ AC_HEADER_STDBOOL
 
 
 AC_ARG_WITH([opencv],
-	[AS_HELP_STRING([--with-opencv=<path>],[specify path for opencv installation @<:@default=/opt/local@:>@])],
+	[AS_HELP_STRING([--with-opencv=<path>],[specify path for opencv installation @<:@default=/usr/local@:>@])],
 	[with_opencv=$withval],
-	[with_opencv=/opt/local])
+	[with_opencv=/usr/local])
+
+AC_ARG_WITH([ice],
+	[AS_HELP_STRING([--with-ice=<path>],[specify path for Ice installation @<:@default=/opt/local@:>@])],
+	[with_ice=$withval],
+	[with_ice=/opt/local])
 
 
 OPENCV_INCLUDE="-I$with_opencv/include"
 OPENCV_LIB="-L$with_opencv/lib"
 
-OPENCV_EXTRA=""
+ICE_INCLUDE="-I$with_ice/include"
+ICE_LIB="-L$with_ice/lib"
+
+ICE_EXTRA=""
 
 case "$host_os" in
     linux*)
         OS=linux ;;
     darwin*)
-		OPENCV_EXTRA="-lZeroCIce"
+		ICE_EXTRA="-lZeroCIce"
         OS=darwin;;
 #    gnu*)
 #        OS=gnu ;;
@@ -50,7 +58,10 @@ case "$host_os" in
 esac
 
 AC_SUBST(OS)
-AC_SUBST(OPENCV_EXTRA)
+
+AC_SUBST(ICE_INCLUDE)
+AC_SUBST(ICE_LIB)
+AC_SUBST(ICE_EXTRA)
 
 AC_SUBST(OPENCV_INCLUDE)
 AC_SUBST(OPENCV_LIB)

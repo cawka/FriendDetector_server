@@ -12,3 +12,7 @@ Makefile
 config.h
 config.status
 
+.dep.inc
+Makefile-cs239_server.mk
+nbproject/
+
