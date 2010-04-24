@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <opencv/cv.h>
+#include <log4cxx/logger.h>
 
 #include "Recognizer.h"
 #include "iFaceIdentifier.h"
@@ -40,6 +41,8 @@ private:
 	CvMemStorage		    *_memStorage;
 
 	iFaceIdentifier *_faceIdentifier;
+
+	static log4cxx::LoggerPtr _log;
 };
 
 #endif

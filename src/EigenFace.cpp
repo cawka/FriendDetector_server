@@ -13,6 +13,8 @@ using namespace std;
 const string SHARE_DIR="./";
 const string TRAIN_FILE=SHARE_DIR+"facedata.xml";
 
+const CvSize FACE_SIZE=cvSize( 64, 80 );
+
 EigenFace::EigenFace( )
 : _trainSet( NULL )
 , _trainFile( TRAIN_FILE )
@@ -101,24 +103,27 @@ void EigenFace::release( )
 
 string EigenFace::recognize( const IplImage *face )
 {
-	float * projectedTestFace = 0;
-	int iNearest, nearest, truth;
+	assert( face!=NULL );
+	
+	//just to make sure we have standard face sizes. Overhead is minimal
+	IplImage *face_resized=cvCreateImage( FACE_SIZE, IPL_DEPTH_8U, 1 );
+	cvResize( face, face_resized );
 
 	// project the test images onto the PCA subspace
-	projectedTestFace = (float*)cvAlloc( _nEigens*sizeof(float) );
+	float *projectedTestFace = (float*)cvAlloc( _nEigens*sizeof(float) );
 
 	// project the test image onto the PCA subspace
 	cvEigenDecomposite(
-		const_cast<IplImage*>(face),
+		const_cast<IplImage*>(face_resized),
 		_nEigens,
 		_eigenVectArr,
 		0, 0,
 		_pAvgTrainImg,
 		projectedTestFace );
 
-	iNearest = findNearestNeighbor( projectedTestFace );
+	int iNearest = findNearestNeighbor( projectedTestFace );
 	//truth    = personNumTruthMat->data.i[i];
-	nearest  = _trainSet->data.i[ iNearest ];
+	int nearest  = _trainSet->data.i[ iNearest ];
 
 	//////////////////////////////////////////////////////////////
 	
@@ -138,6 +143,7 @@ string EigenFace::recognize( const IplImage *face )
 	}
 
 	cvFree( &projectedTestFace );
+	cvReleaseImage( &face_resized );
 
 	return name;
 }
@@ -168,7 +174,7 @@ int EigenFace::findNearestNeighbor( const float *projectedFace ) const
 			iNearest = iTrain;
 		}
 
-		cout << "Person #" << iTrain << ", euclidean distance: " << distSq << endl;
+		cout << "test face #" << iTrain << ", euclidean distance: " << sqrt(distSq) << endl;
 	}
 
 	return iNearest;

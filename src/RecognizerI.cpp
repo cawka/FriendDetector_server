@@ -1,16 +1,22 @@
 
+#include <stdexcept>
+
 #include "RecognizerI.h"
 #include "EigenFace.h"
 
-#include <fstream>
+#include <stdexcept>
+
 #include <opencv/highgui.h>
 #include <opencv/cv.h>
+
 
 const string SHARE_DIR="./";
 const string CASCADE_FILE=SHARE_DIR+"haarcascade_frontalface_alt.xml";
 
 using namespace std;
 using namespace cv;
+
+log4cxx::LoggerPtr RecognizerI::_log=log4cxx::Logger::getLogger( "RecognizerI" );
 
 //char *recognize(char *);
 //
@@ -33,6 +39,10 @@ RecognizerI::RecognizerI( )
 {
 	_memStorage=cvCreateMemStorage( 0 );
 	_cascade   =static_cast<CvHaarClassifierCascade*>( cvLoad(_cascadeFile.c_str()) );
+	if( _cascade==NULL )
+	{
+		throw std::runtime_error( "Cannot load cascade file for HaarDetect ["+_cascadeFile+"]" );
+	}
 
 	_faceIdentifier=new EigenFace( );
 }
@@ -47,9 +57,10 @@ RecognizerI::~RecognizerI( )
 
 Faces RecognizerI::findFacesAndRecognizePeople( const pair<const Byte*, const Byte*>& jpegFile, const Current& )
 {
-	cout << "received request findFacesAndRecognizePeople" << endl;
+	_log->debug( "received request `findFacesAndRecognizePeople`" );
 
 	CvMat *buf=cvCreateMatHeader( 1, jpegFile.second-jpegFile.first, CV_8UC1 );
+	buf->data.ptr=const_cast<uchar*>( jpegFile.first );
 	IplImage *image = cvDecodeImage( buf, CV_LOAD_IMAGE_GRAYSCALE );
 	cvReleaseMat( &buf );
 
@@ -59,8 +70,6 @@ Faces RecognizerI::findFacesAndRecognizePeople( const pair<const Byte*, const By
 	CvSeq* faces = cvHaarDetectObjects( image, _cascade, _memStorage, \
 				_haar_scale, _min_neighbors, _haar_flags, _min_size );
 
-	cvReleaseImage( &image );
-
 	Faces ret;
 	for(int i=0; i < (faces?faces->total:0); i++ )
 	{
@@ -69,25 +78,64 @@ Faces RecognizerI::findFacesAndRecognizePeople( const pair<const Byte*, const By
 	    CvRect* r = (CvRect*)cvGetSeqElem( faces, i );
 
 	    // Find the dimensions of the face,and scale it if necessary
+		int h_off=(int)(r->height*0.125);
+		r->y      -= h_off;
+		r->height += 2*h_off;
+
 	    face.position.left   = r->x;
-	    face.position.top    = r->x + r->width;
-	    face.position.right  = r->y;
+	    face.position.top    = r->y;
+	    face.position.right  = r->x + r->width;
 	    face.position.bottom = r->y + r->height;
 		
-	    face.name = "Alex The Great";
-	    
+		IplImage *face_image=cvCreateImage( cvSize(r->width,r->height),
+										    IPL_DEPTH_8U, 1 );
+		cvGetRectSubPix( image, face_image,
+					 cvPoint2D32f(r->x + r->width/2.0,
+								  r->y + r->height/2.0) );
+
+//		{
+//			ostringstream os;
+//			os	<< "w: " << face_image_full->width << ", "
+//				<< "h: " << face_image_full->height << ", "
+//				<< "center_x: " << r->x + r->width/2.0 << ", "
+//				<< "center_y: " << r->y + r->height/2.0;
+//			_log->debug( os.str() );
+//		}
+//		cvSaveImage( "face_full.jpeg", face_image_full );
+
+
+	    face.name = _faceIdentifier->recognize( face_image );
+
+		{
+			ostringstream os;
+			os	<< "(" << face.position.left  << ", " << face.position.top    << ") "
+				<< "(" << face.position.right << ", " << face.position.bottom << ") ";
+
+			os  << ((face.name!="")?face.name:string("unknown person"));
+			_log->debug( os.str() );
+		}
+
+//		cvSaveImage( "face.jpeg", face_image_resized );
+
+		cvReleaseImage( &face_image );
+
 	    ret.push_back( face );
 	}
 	//there is a small chance that 'faces' and 'r' structures should be released...
 
+//	cvSaveImage( "image.jpeg", image );
+	cvReleaseImage( &image );
+
+	_log->debug( "return from `findFacesAndRecognizePeople`" );
 	return ret;
 }
 
 string RecognizerI::recognizeFace( const pair<const Byte*, const Byte*>& jpegFileOfFace, const Current& )
 {
-	cout << "received request recognizeFace" << endl;
+	_log->debug( "received request `recognizeFace`" );
 
 	CvMat *buf=cvCreateMatHeader( 1, jpegFileOfFace.second-jpegFileOfFace.first, CV_8UC1 );
+	buf->data.ptr=const_cast<uchar*>( jpegFileOfFace.first );
 	IplImage *image = cvDecodeImage( buf, CV_LOAD_IMAGE_GRAYSCALE );
 	cvReleaseMat( &buf );
 
@@ -95,11 +143,14 @@ string RecognizerI::recognizeFace( const pair<const Byte*, const Byte*>& jpegFil
 
 	cvReleaseImage( &image );
 
+	_log->debug( "exit from `recognizeFace`" );
 	return name;
 }
 
 void RecognizerI::learn( const pair<const Byte*, const Byte*>& jpegFileOfFace,
 	   const string &name,	const Current& )
 {
+	cout << "received request `learn`" << endl;
+
 }
 
