@@ -12,6 +12,7 @@ server_LDFLAGS=$(LDFLAGS) \
 			   $(ICE_LIB) $(ICE_EXTRA) -lIce -lIceUtil \
 			   $(OPENCV_LIB) -lcxcore -lcv -lcvaux -lhighgui \
 			   -llog4cxx
-
-server_CPPFLAGS=$(CPPFLAGS) $(ICE_INCLUDE) $(OPENCV_INCLUDE) -I. 
-
+	
+server_CPPFLAGS=-O0	$(ICE_INCLUDE) $(OPENCV_INCLUDE) -I. 
+#$(CPPFLAGS)
+	

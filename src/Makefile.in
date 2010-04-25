@@ -192,7 +192,7 @@ server_LDFLAGS = $(LDFLAGS) \
 			   $(OPENCV_LIB) -lcxcore -lcv -lcvaux -lhighgui \
 			   -llog4cxx
 
-server_CPPFLAGS = $(CPPFLAGS) $(ICE_INCLUDE) $(OPENCV_INCLUDE) -I. 
+server_CPPFLAGS = -O0	$(ICE_INCLUDE) $(OPENCV_INCLUDE) -I. 
 all: all-am
 
 .SUFFIXES:
@@ -547,6 +547,7 @@ uninstall-am: uninstall-binPROGRAMS
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-binPROGRAMS
 
+#$(CPPFLAGS)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

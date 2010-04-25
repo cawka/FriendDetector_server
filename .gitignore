@@ -15,4 +15,7 @@ config.status
 .dep.inc
 Makefile-cs239_server.mk
 nbproject/
+facedata.xml
+facedata_.xml
+train/*.png
 

@@ -6,6 +6,8 @@
 
 #include <opencv/cxtypes.h>
 #include <string>
+#include <vector>
+#include <log4cxx/logger.h>
 
 using namespace std;
 
@@ -20,11 +22,13 @@ public:
 	virtual void   learn( const IplImage *face, const string &name );
 
 protected:
-	virtual int findNearestNeighbor( const float *projectedFace ) const;
+	virtual int  findNearestNeighbor( const float *projectedFace ) const;
+	virtual void doPCA( );
 
 private:
-	void release( );
 	void load( );
+	void store( );
+	void release( );
 
 private:
 	string _trainFile;
@@ -37,6 +41,14 @@ private:
 
 	IplImage  *_pAvgTrainImg; // the average image
 	IplImage **_eigenVectArr; // eigenvectors
+
+	vector<string> _peopleNames;  //names of people. All names should be unique
+	map<string,int> _idByName;    //to make person id search faster
+
+	vector<int>    _peopleImages; //number of images of a person
+
+
+	static log4cxx::LoggerPtr _log;
 };
 
 #endif

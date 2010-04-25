@@ -59,7 +59,7 @@ Faces RecognizerI::findFacesAndRecognizePeople( const pair<const Byte*, const By
 {
 	_log->debug( "received request `findFacesAndRecognizePeople`" );
 
-	CvMat *buf=cvCreateMatHeader( 1, jpegFile.second-jpegFile.first, CV_8UC1 );
+	CvMat *buf=cvCreateMatHeader( 1, jpegFile.second-jpegFile.first, CV_32FC1 );
 	buf->data.ptr=const_cast<uchar*>( jpegFile.first );
 	IplImage *image = cvDecodeImage( buf, CV_LOAD_IMAGE_GRAYSCALE );
 	cvReleaseMat( &buf );
@@ -88,7 +88,7 @@ Faces RecognizerI::findFacesAndRecognizePeople( const pair<const Byte*, const By
 	    face.position.bottom = r->y + r->height;
 		
 		IplImage *face_image=cvCreateImage( cvSize(r->width,r->height),
-										    IPL_DEPTH_8U, 1 );
+										    image->depth, image->nChannels );
 		cvGetRectSubPix( image, face_image,
 					 cvPoint2D32f(r->x + r->width/2.0,
 								  r->y + r->height/2.0) );
@@ -134,7 +134,7 @@ string RecognizerI::recognizeFace( const pair<const Byte*, const Byte*>& jpegFil
 {
 	_log->debug( "received request `recognizeFace`" );
 
-	CvMat *buf=cvCreateMatHeader( 1, jpegFileOfFace.second-jpegFileOfFace.first, CV_8UC1 );
+	CvMat *buf=cvCreateMatHeader( 1, jpegFileOfFace.second-jpegFileOfFace.first, CV_32FC1 );
 	buf->data.ptr=const_cast<uchar*>( jpegFileOfFace.first );
 	IplImage *image = cvDecodeImage( buf, CV_LOAD_IMAGE_GRAYSCALE );
 	cvReleaseMat( &buf );
@@ -152,5 +152,13 @@ void RecognizerI::learn( const pair<const Byte*, const Byte*>& jpegFileOfFace,
 {
 	cout << "received request `learn`" << endl;
 
+	CvMat *buf=cvCreateMatHeader( 1, jpegFileOfFace.second-jpegFileOfFace.first, CV_32FC1 );
+	buf->data.ptr=const_cast<uchar*>( jpegFileOfFace.first );
+	IplImage *image = cvDecodeImage( buf, CV_LOAD_IMAGE_GRAYSCALE );
+	cvReleaseMat( &buf );
+
+	_faceIdentifier->learn( image, name );
+
+	cvReleaseImage( &image );
 }
 
