@@ -282,7 +282,7 @@ int EigenFace::findNearestNeighbor( const float *projectedFace ) const
 				_projectedTrainFaceMat->data.fl[iTrain*_nEigens + i];
 			
 			//distSq += d_i*d_i / eigenValMat->data.fl[i];  // Mahalanobis
-			distSq += sqrt( d_i*d_i ); // Euclidean
+			distSq += d_i*d_i; // Euclidean
 		}
 		
 		{
@@ -296,6 +296,8 @@ int EigenFace::findNearestNeighbor( const float *projectedFace ) const
 			os << "current threshold: " << leastDistSq;
 			_log->debug( os.str() );
 		}
+
+		distSq = sqrt( distSq );
 
 		if( distSq < leastDistSq )
 		{
