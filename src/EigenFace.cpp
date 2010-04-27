@@ -284,10 +284,22 @@ int EigenFace::findNearestNeighbor( const float *projectedFace ) const
 			//distSq += d_i*d_i / eigenValMat->data.fl[i];  // Mahalanobis
 			distSq += d_i*d_i; // Euclidean
 		}
+
+		distSq = sqrt( distSq );
 		
+		if( distSq < leastDistSq )
+		{
+			leastDistSq = distSq;
+			iNearest = iTrain;
+		}
+
+		///////////////////////////////////////////////////////////
+
 		{
 			ostringstream os;
-			os << "test face #" << iTrain << ", euclidean distance: " << distSq;
+			os << "test face #" << iTrain << " (";
+			os << _peopleNames[ _trainSet->data.i[ iTrain ] ];
+			os << "), euclidean distance: " << distSq;
 			_log->debug( os.str() );
 		}
 
@@ -295,14 +307,6 @@ int EigenFace::findNearestNeighbor( const float *projectedFace ) const
 			ostringstream os;
 			os << "current threshold: " << leastDistSq;
 			_log->debug( os.str() );
-		}
-
-		distSq = sqrt( distSq );
-
-		if( distSq < leastDistSq )
-		{
-			leastDistSq = distSq;
-			iNearest = iTrain;
 		}
 	}
 
@@ -406,7 +410,7 @@ void EigenFace::doPCA( )
 	_pAvgTrainImg = cvCreateImage( FACE_SIZE, IPL_DEPTH_32F, 1 );
 
 	// set the PCA termination criterion
-	calcLimit = cvTermCriteria( CV_TERMCRIT_ITER, _nEigens, 1 );
+	calcLimit = cvTermCriteria( CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, _nEigens, 0.01 );
 
 	_log->debug( "running cvCalcEigenObjects" );
 
@@ -435,10 +439,23 @@ void EigenFace::doPCA( )
 
 	cvNormalize( _eigenValMat, _eigenValMat, 1, 0, CV_L1, 0 );
 
+	ostringstream os;
+	os << "Real eps: " << calcLimit.epsilon << ", ";
+	os << " max_iter: " << calcLimit.max_iter;
+	_log->debug( os.str() );
+
+	if( calcLimit.max_iter<_nEigens )
+	{
+		_log->debug( "calcLimit.max_iter < _nEigens" );
+		for( int i=calcLimit.max_iter; i<_nEigens; i++ )
+		{
+			cvReleaseImage( &_eigenVectArr[i] );
+		}
+		
+		_nEigens=calcLimit.max_iter;
+	}
+
 	_log->debug( "Eigen space recalculated" );
-
-
-
 
 
 	//////////////////////////////////////////////////////////////////////
