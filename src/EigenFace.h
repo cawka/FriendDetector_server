@@ -9,8 +9,13 @@
 #include <vector>
 #include <log4cxx/logger.h>
 
-using namespace std;
+#include "Recognizer.h"
+#include "init.h"
 
+using namespace std;
+using namespace FriendDetector;
+
+const string EIGEN_TABLE="eigen";
 
 class EigenFace : public virtual iFaceIdentifier
 {
@@ -21,6 +26,8 @@ public:
 	virtual string recognize( const IplImage *face );
 	virtual void   learn( const IplImage *face, const string &name );
 
+	virtual shared_ptr<FacePicturesWithNames> getTrainSet( );
+
 protected:
 	virtual int  findNearestNeighbor( const float *projectedFace ) const;
 	virtual void doPCA( );
@@ -29,6 +36,9 @@ private:
 	void load( );
 	void store( );
 	void release( );
+
+
+	void initdb( );
 
 private:
 	string _trainFile;

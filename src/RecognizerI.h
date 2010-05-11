@@ -20,14 +20,19 @@ public:
 	RecognizerI( );
 	virtual ~RecognizerI( );
 
-    virtual Faces findFacesAndRecognizePeople( const pair<const Byte*, const Byte*> &jpegFile,
+    virtual Faces findFacesAndRecognizePeople( const File &jpegFile,
 										       const Current& = Current());
 
-    virtual string recognizeFace( const pair<const Byte*, const Byte*>& jpegFileOfFace,
+    virtual string recognizeFace( const File& jpegFileOfFace,
 								  const Current& = Current());
 
-    virtual void learn( const pair<const Byte*, const Byte*>& jpegFileOfFace, 
+    virtual void learn( const File& jpegFileOfFace,
 						const string &name, const Current& = Current() );
+
+
+	virtual FacePicturesWithNames getTrainSet( const Current& =Current( ) );
+
+	virtual void unLearn( Int, const Current& =Current( ) );
 
 private:
 	CvSize _min_size;

@@ -55,12 +55,12 @@ RecognizerI::~RecognizerI( )
 	delete _faceIdentifier;
 }
 
-Faces RecognizerI::findFacesAndRecognizePeople( const pair<const Byte*, const Byte*>& jpegFile, const Current& )
+Faces RecognizerI::findFacesAndRecognizePeople( const File& jpegFile, const Current& )
 {
 	_log->debug( "received request `findFacesAndRecognizePeople`" );
 
-	CvMat *buf=cvCreateMatHeader( 1, jpegFile.second-jpegFile.first, CV_32FC1 );
-	buf->data.ptr=const_cast<uchar*>( jpegFile.first );
+	CvMat *buf=cvCreateMatHeader( 1, jpegFile.size(), CV_32FC1 );
+	buf->data.ptr=const_cast<uchar*>( &jpegFile[0] );//const_cast<uchar*>( jpegFile.begin() );
 	IplImage *image = cvDecodeImage( buf, CV_LOAD_IMAGE_GRAYSCALE );
 	cvReleaseMat( &buf );
 
@@ -130,12 +130,12 @@ Faces RecognizerI::findFacesAndRecognizePeople( const pair<const Byte*, const By
 	return ret;
 }
 
-string RecognizerI::recognizeFace( const pair<const Byte*, const Byte*>& jpegFileOfFace, const Current& )
+string RecognizerI::recognizeFace( const File& jpegFileOfFace, const Current& )
 {
 	_log->debug( "received request `recognizeFace`" );
 
-	CvMat *buf=cvCreateMatHeader( 1, jpegFileOfFace.second-jpegFileOfFace.first, CV_32FC1 );
-	buf->data.ptr=const_cast<uchar*>( jpegFileOfFace.first );
+	CvMat *buf=cvCreateMatHeader( 1, jpegFileOfFace.size(), CV_32FC1 );
+	buf->data.ptr=const_cast<uchar*>( &jpegFileOfFace[0] );
 	IplImage *image = cvDecodeImage( buf, CV_LOAD_IMAGE_GRAYSCALE );
 	cvReleaseMat( &buf );
 
@@ -147,14 +147,14 @@ string RecognizerI::recognizeFace( const pair<const Byte*, const Byte*>& jpegFil
 	return name;
 }
 
-void RecognizerI::learn( const pair<const Byte*, const Byte*>& jpegFileOfFace,
+void RecognizerI::learn( const File& jpegFileOfFace,
 	   const string &name,	const Current& )
 {
 	cout << "received request `learn`" << endl;
 
-	CvMat *buf=cvCreateMatHeader( 1, jpegFileOfFace.second-jpegFileOfFace.first, CV_32FC1 );
-	buf->data.ptr=const_cast<uchar*>( jpegFileOfFace.first );
-	IplImage *image = cvDecodeImage( buf, CV_LOAD_IMAGE_GRAYSCALE );
+	CvMat *buf=cvCreateMatHeader( 1, jpegFileOfFace.size(), CV_32FC1 );
+	buf->data.ptr=const_cast<uchar*>( &jpegFileOfFace[0] );
+	IplImage *image = cvDecodeImage( buf, CV_LOAD_IMAGE_UNCHANGED );
 	cvReleaseMat( &buf );
 
 	_faceIdentifier->learn( image, name );
@@ -162,3 +162,12 @@ void RecognizerI::learn( const pair<const Byte*, const Byte*>& jpegFileOfFace,
 	cvReleaseImage( &image );
 }
 
+FacePicturesWithNames RecognizerI::getTrainSet( const Current& )
+{
+	return *( _faceIdentifier->getTrainSet() );
+}
+
+void RecognizerI::unLearn( Int id, const Current& )
+{
+	_log->debug( "unLearn requested, but it is not yet implemented :(" );
+}

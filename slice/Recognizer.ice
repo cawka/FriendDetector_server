@@ -21,15 +21,28 @@
  		string name;
  	};
  	
- 	sequence<Face> Faces;
+  	sequence<Face> Faces;
  
+ 	struct FacePictureWithName
+ 	{
+ 		int id;
+ 		File jpegFileOfFace;
+ 		string name;
+ 	};
+ 	
+ 	sequence<FacePictureWithName> FacePicturesWithNames;
+ 	
  	interface Recognizer
  	{
- 		Faces findFacesAndRecognizePeople( ["cpp:array"] File jpegFile );
+ 		Faces findFacesAndRecognizePeople( File jpegFile );
  		
- 		string recognizeFace( ["cpp:array"] File jpegFileOfFace );
+ 		string recognizeFace( File jpegFileOfFace );
  		
- 		void learn( ["cpp:array"] File jpegFileOfFace, string name );
+ 		void learn( File jpegFileOfFace, string name );
+ 		
+ 		FacePicturesWithNames getTrainSet( );
+ 		
+ 		void unLearn( int id );
  	};
  };
  

@@ -10,8 +10,18 @@
 
 #include "RecognizerI.h"
 
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/option.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/value_semantic.hpp>
+
+#include "init.h"
+
+namespace po = boost::program_options;
 using namespace std;
 
+shared_ptr<Database> DB;
 
 class Server : virtual public Ice::Application
 {
@@ -56,6 +66,41 @@ int main( int argc, char **argv )
 		log4cxx::PropertyConfigurator::configure( "logger.conf" );
 	else
 		log4cxx::BasicConfigurator::configure( );
+
+    po::options_description opts( "General options" );
+    opts.add_options()
+        ( "help", "Print this help message" )
+        ( "db",    po::value<string>()->default_value("eigens.db"), "Database file" )
+    ;
+
+	try
+    {
+		po::variables_map conf;
+
+        ifstream config( "server.conf" );
+        po::store( po::parse_config_file(config, opts), conf );
+        po::store( po::command_line_parser(argc, argv).
+                        options(opts).run(),
+                   conf );
+
+		if( conf.count("help")>0 )
+		{
+			cout << opts;
+			return 0;
+		}
+
+		DB=shared_ptr<Database>( new Database(conf["db"].as<string>( ).c_str( )) );
+		if (!DB->Connected() )
+		{
+			cerr << "Database not connected - exiting" << endl;
+			return -1;
+		}
+
+	}
+	catch( const po::invalid_option_value &error )
+    {
+        cerr << "ERROR: "  << error.what() << endl;
+    }
 
 	Server app;
 	app.main( argc, argv );

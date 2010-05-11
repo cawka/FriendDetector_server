@@ -9,6 +9,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <iterator>
+
 using namespace std;
 
 const string SHARE_DIR="./";
@@ -18,6 +20,16 @@ const string TRAIN_FILE=SHARE_DIR+"facedata.xml";
 const CvSize FACE_SIZE=cvSize( 64, 80 );
 
 const double EIGEN_THRESHOLD=21000.0;
+
+const string DROP_STATEMENT=
+	"DROP TABLE IF EXISTS "+EIGEN_TABLE;
+
+const string CREATE_STATEMENT=
+	"CREATE TABLE "+EIGEN_TABLE+"( " +
+			"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+			"name VARCHAR(255) NOT NULL" +
+			" "+
+	    ")";
 
 log4cxx::LoggerPtr EigenFace::_log=log4cxx::Logger::getLogger( "EigenFace" );
 
@@ -46,6 +58,8 @@ EigenFace::EigenFace( )
 		}
 	}
 
+	initdb( );
+
 	try
 	{
 		load( );
@@ -61,6 +75,21 @@ EigenFace::EigenFace( )
 EigenFace::~EigenFace( )
 {
 	release( );
+}
+
+
+void EigenFace::initdb( )
+{
+	Query q( *DB );
+	q.get_string( "SELECT name FROM sqlite_master WHERE name='"+EIGEN_TABLE+"'" );
+
+	if( q.GetErrno()!=0 )
+	{
+		_log->debug( "Recreating sqlite3 table ["+EIGEN_TABLE+"]" );
+
+		q.execute( DROP_STATEMENT );
+		q.execute( CREATE_STATEMENT );
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -485,4 +514,36 @@ void EigenFace::doPCA( )
 	}
 
 	store( );
+}
+
+
+shared_ptr<FacePicturesWithNames> EigenFace::getTrainSet( )
+{
+	shared_ptr<FacePicturesWithNames> ret=shared_ptr<FacePicturesWithNames>( new FacePicturesWithNames() );
+
+	int abs_index=0;
+	for( int i=0; i<_peopleNames.size(); i++ )
+	{
+		for( int j=0; j<_peopleImages[i]; j++ )
+		{
+			FacePictureWithName value;
+			value.id=abs_index;
+			value.name=_peopleNames[i];
+
+			ostringstream filename;
+			filename << STORAGE_DIR << i << "_" << j << ".png";
+//			_log->debug( "Trying to load image ["+filename.str()+"]" );
+			ifstream f( filename.str().c_str() );
+			f >> std::noskipws;
+
+			std::copy( istream_iterator<char>(f), istream_iterator<char>(),
+					 std::back_inserter(value.jpegFileOfFace) );
+
+			ret->push_back( value );
+
+			abs_index++;
+		}
+	}
+
+	return ret;
 }
