@@ -8,13 +8,15 @@
 #ifndef _INIT_H
 #define	_INIT_H
 
-#include <sqlite3.h>
-#include <libsqlitewrapped.h>
+#define OTL_ODBC_UNIX
+//#define OTL_ODBC
+#define OTL_STL
+#include <otlv4.h>
 
 #include <boost/shared_ptr.hpp>
 using namespace boost;
 
-extern shared_ptr<Database> DB;
+extern otl_connect DB;
 
 #endif	/* _INIT_H */
 

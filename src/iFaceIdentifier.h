@@ -7,17 +7,13 @@
 #include <string>
 using namespace std;
 
-#include "init.h"
-#include "Recognizer.h"
-using namespace FriendDetector;
-
 class iFaceIdentifier
 {
 public:
 	virtual string recognize( const IplImage *face ) = 0;
 	virtual void   learn( const IplImage *face, const string &name ) = 0;
 
-	virtual shared_ptr<FacePicturesWithNames> getTrainSet( ) = 0;
+	virtual void   reInit( ) = 0;
 };
 
 #endif

@@ -9,8 +9,9 @@
 #include <opencv/highgui.h>
 #include <opencv/cv.h>
 
+#include <fstream>
+#include <iterator>
 
-const string SHARE_DIR="./";
 const string CASCADE_FILE=SHARE_DIR+"haarcascade_frontalface_alt.xml";
 
 using namespace std;
@@ -150,7 +151,7 @@ string RecognizerI::recognizeFace( const File& jpegFileOfFace, const Current& )
 void RecognizerI::learn( const File& jpegFileOfFace,
 	   const string &name,	const Current& )
 {
-	cout << "received request `learn`" << endl;
+	_log->debug( "received request `learn`" );
 
 	CvMat *buf=cvCreateMatHeader( 1, jpegFileOfFace.size(), CV_32FC1 );
 	buf->data.ptr=const_cast<uchar*>( &jpegFileOfFace[0] );
@@ -164,10 +165,43 @@ void RecognizerI::learn( const File& jpegFileOfFace,
 
 FacePicturesWithNames RecognizerI::getTrainSet( const Current& )
 {
-	return *( _faceIdentifier->getTrainSet() );
+	_log->debug( "received request `getTrainSet`" );
+
+	FacePicturesWithNames ret;
+
+	otl_stream q( 100, "SELECT id :#1<int>, name :#2<char[255]> FROM eigen ORDER BY name,id", DB );
+	while( !q.eof() )
+	{
+		FacePictureWithName value;
+		q >> value.id >> value.name;
+
+		ostringstream filename;
+		filename << STORAGE_DIR << value.id  << ".png";
+
+		ifstream f( filename.str().c_str() );
+		f >> std::noskipws;
+
+		std::copy( istream_iterator<char>(f), istream_iterator<char>(),
+				 std::back_inserter(value.jpegFileOfFace) );
+
+		ret.push_back( value );
+	}
+
+	return ret;
 }
 
 void RecognizerI::unLearn( Int id, const Current& )
 {
-	_log->debug( "unLearn requested, but it is not yet implemented :(" );
+	_log->debug( "received request `unLearn`" );
+
+	otl_stream q( 0, "DELETE FROM eigen WHERE id=:id<int>", DB );
+	q.set_commit( true );
+	q << id;
+	q.flush(); //without this thing everything crashes :)
+
+	ostringstream filename;
+	filename << STORAGE_DIR << id  << ".png";
+	unlink( filename.str().c_str() );
+	
+	_faceIdentifier->reInit( );
 }

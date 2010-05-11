@@ -17,6 +17,9 @@ using namespace FriendDetector;
 
 const string EIGEN_TABLE="eigen";
 
+const string SHARE_DIR="./";
+const string STORAGE_DIR="train/"; //directory where face images will be located
+
 class EigenFace : public virtual iFaceIdentifier
 {
 public:
@@ -26,23 +29,25 @@ public:
 	virtual string recognize( const IplImage *face );
 	virtual void   learn( const IplImage *face, const string &name );
 
-	virtual shared_ptr<FacePicturesWithNames> getTrainSet( );
+	virtual void   reInit( );
+
+//	virtual shared_ptr</FacePicturesWithNames> getTrainSet( );
 
 protected:
 	virtual int  findNearestNeighbor( const float *projectedFace ) const;
 	virtual void doPCA( );
 
 private:
-	void load( );
-	void store( );
+//	void load( );
+//	void store( );
 	void release( );
-
 
 	void initdb( );
 
 private:
 	string _trainFile;
-	CvMat *_trainSet;
+//	CvMat *_trainSet;
+	vector<string> _knownNames; // abs_index => name
 
 	int    _nEigens;
 	int    _nTrainFaces;
@@ -52,10 +57,10 @@ private:
 	IplImage  *_pAvgTrainImg; // the average image
 	IplImage **_eigenVectArr; // eigenvectors
 
-	vector<string> _peopleNames;  //names of people. All names should be unique
-	map<string,int> _idByName;    //to make person id search faster
+//	vector<string> _peopleNames;  //names of people. All names should be unique
+//	map<string,int> _idByName;    //to make person id search faster
 
-	vector<int>    _peopleImages; //number of images of a person
+//	vector<int>    _peopleImages; //number of images of a person
 
 
 	static log4cxx::LoggerPtr _log;

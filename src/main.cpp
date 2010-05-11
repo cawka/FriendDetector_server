@@ -21,7 +21,7 @@
 namespace po = boost::program_options;
 using namespace std;
 
-shared_ptr<Database> DB;
+otl_connect DB;
 
 class Server : virtual public Ice::Application
 {
@@ -70,9 +70,10 @@ int main( int argc, char **argv )
     po::options_description opts( "General options" );
     opts.add_options()
         ( "help", "Print this help message" )
-        ( "db",    po::value<string>()->default_value("eigens.db"), "Database file" )
+        ( "db",    po::value<string>()->default_value("Driver=SQLite;Database=eigen.db"), "Database DSN" )
     ;
 
+	otl_connect::otl_initialize( ); // initialize ODBC environment
 	try
     {
 		po::variables_map conf;
@@ -89,20 +90,30 @@ int main( int argc, char **argv )
 			return 0;
 		}
 
-		DB=shared_ptr<Database>( new Database(conf["db"].as<string>( ).c_str( )) );
-		if (!DB->Connected() )
-		{
-			cerr << "Database not connected - exiting" << endl;
-			return -1;
-		}
+		DB.rlogon( conf["db"].as<string>( ).c_str(), 0 /*auto_commit=true*/ );
+//		DB=shared_ptr<Database>( new Database(conf["db"].as<string>( ).c_str( )) );
+//		if (!DB->Connected() )
+//		{
+//			cerr << "Database not connected - exiting" << endl;
+//			return -1;
+//		}
 
+		Server app;
+		app.main( argc, argv );
 	}
+    catch( otl_exception& p ) // intercept OTL exceptions
+    {
+        cerr << p.msg << endl; // print out error message
+        cerr << p.stm_text << endl; // print out SQL that caused the error
+        cerr << p.sqlstate << endl; // print out SQLSTATE message
+        cerr << p.var_info << endl; // print out the variable that caused the error
+
+        return -10;
+    }
 	catch( const po::invalid_option_value &error )
     {
         cerr << "ERROR: "  << error.what() << endl;
     }
 
-	Server app;
-	app.main( argc, argv );
 	return 0;
 }

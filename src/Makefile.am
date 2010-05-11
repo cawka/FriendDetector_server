@@ -5,6 +5,7 @@ server_SOURCES=Recognizer.cpp Recognizer.h \
 			   RecognizerI.cpp RecognizerI.h \
 			   iFaceIdentifier.h \
 			   EigenFace.h EigenFace.cpp \
+			   otlv4.h \
 			   main.cpp
 
 
@@ -13,7 +14,7 @@ server_LDFLAGS=$(LDFLAGS) \
 			   $(OPENCV_LIB) -lcxcore -lcv -lcvaux -lhighgui \
 			   -llog4cxx \
 			   -lboost_program_options \
-			   -lsqlite3 -lsqlitewrapped
+			   -lodbcinst -lodbc  
 	
 server_CPPFLAGS=$(ICE_INCLUDE) $(OPENCV_INCLUDE) -I. 
 #$(CPPFLAGS)
