@@ -56,10 +56,8 @@ RecognizerI::~RecognizerI( )
 	delete _faceIdentifier;
 }
 
-Faces RecognizerI::findFacesAndRecognizePeople( const File& jpegFile, const Current& )
+Faces RecognizerI::findFacesAndOrRecognize( const File& jpegFile, bool recognize/*=true*/ )
 {
-	_log->debug( "received request `findFacesAndRecognizePeople`" );
-
 	CvMat *buf=cvCreateMatHeader( 1, jpegFile.size(), CV_32FC1 );
 	buf->data.ptr=const_cast<uchar*>( &jpegFile[0] );//const_cast<uchar*>( jpegFile.begin() );
 	IplImage *image = cvDecodeImage( buf, CV_LOAD_IMAGE_GRAYSCALE );
@@ -79,15 +77,17 @@ Faces RecognizerI::findFacesAndRecognizePeople( const File& jpegFile, const Curr
 	    CvRect* r = (CvRect*)cvGetSeqElem( faces, i );
 
 	    // Find the dimensions of the face,and scale it if necessary
-		int h_off=(int)(r->height*0.125);
-		r->y      -= h_off;
-		r->height += 2*h_off;
+		int w_off=(int)(r->width*0.125);
+//		r->y      -= h_off;
+//		r->height += 2*h_off;
+		r->x	  += w_off;
+		r->width  -= 2*w_off;
 
 	    face.position.left   = r->x;
 	    face.position.top    = r->y;
 	    face.position.right  = r->x + r->width;
 	    face.position.bottom = r->y + r->height;
-		
+
 		IplImage *face_image=cvCreateImage( cvSize(r->width,r->height),
 										    image->depth, image->nChannels );
 		cvGetRectSubPix( image, face_image,
@@ -105,15 +105,17 @@ Faces RecognizerI::findFacesAndRecognizePeople( const File& jpegFile, const Curr
 //		cvSaveImage( "face_full.jpeg", face_image_full );
 
 
-	    face.name = _faceIdentifier->recognize( face_image );
-
+		if( recognize )
 		{
-			ostringstream os;
-			os	<< "(" << face.position.left  << ", " << face.position.top    << ") "
-				<< "(" << face.position.right << ", " << face.position.bottom << ") ";
-
-			os  << ((face.name!="")?face.name:string("unknown person"));
-			_log->debug( os.str() );
+			face.name = _faceIdentifier->recognize( face_image );
+//			{
+//				ostringstream os;
+//				os	<< "(" << face.position.left  << ", " << face.position.top    << ") "
+//					<< "(" << face.position.right << ", " << face.position.bottom << ") ";
+//
+//				os  << ((face.name!="")?face.name:string("unknown person"));
+//				_log->debug( os.str() );
+//			}
 		}
 
 //		cvSaveImage( "face.jpeg", face_image_resized );
@@ -124,12 +126,27 @@ Faces RecognizerI::findFacesAndRecognizePeople( const File& jpegFile, const Curr
 	}
 	//there is a small chance that 'faces' and 'r' structures should be released...
 
-//	cvSaveImage( "image.jpeg", image );
 	cvReleaseImage( &image );
 
-	_log->debug( "return from `findFacesAndRecognizePeople`" );
 	return ret;
 }
+
+
+Faces RecognizerI::findFacesAndRecognizePeople( const File& jpegFile, const Current& )
+{
+	_log->debug( "received request `findFacesAndRecognizePeople`" );
+
+	return findFacesAndOrRecognize( jpegFile, true );
+}
+
+
+Faces RecognizerI::findFaces( const File &jpegFile, const Current& )
+{
+	_log->debug( "received request `findFaces`" );
+
+	return findFacesAndOrRecognize( jpegFile, false );
+}
+
 
 string RecognizerI::recognizeFace( const File& jpegFileOfFace, const Current& )
 {
@@ -169,6 +186,21 @@ FacePicturesWithNames RecognizerI::getTrainSet( const Current& )
 
 	FacePicturesWithNames ret;
 
+	{
+		FacePictureWithName value;
+		value.id=-1;
+		value.name="Average face";
+		
+		string filename=dynamic_cast<EigenFace*>(_faceIdentifier)->getAvgFace( );
+		ifstream f( filename.c_str() );
+		f >> std::noskipws;
+
+		std::copy( istream_iterator<char>(f), istream_iterator<char>(),
+				 std::back_inserter(value.jpegFileOfFace) );
+
+		ret.push_back( value );
+	}
+
 	otl_stream q( 100, "SELECT id :#1<int>, name :#2<char[255]> FROM eigen ORDER BY name,id", DB );
 	while( !q.eof() )
 	{
@@ -193,6 +225,7 @@ FacePicturesWithNames RecognizerI::getTrainSet( const Current& )
 void RecognizerI::unLearn( Int id, const Current& )
 {
 	_log->debug( "received request `unLearn`" );
+	if( id<=0 ) return;
 
 	otl_stream q( 0, "DELETE FROM eigen WHERE id=:id<int>", DB );
 	q.set_commit( true );

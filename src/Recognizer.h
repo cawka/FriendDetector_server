@@ -213,6 +213,21 @@ private:
     
 public:
 
+    ::FriendDetector::Faces findFaces(const ::FriendDetector::File& jpegFile)
+    {
+        return findFaces(jpegFile, 0);
+    }
+    ::FriendDetector::Faces findFaces(const ::FriendDetector::File& jpegFile, const ::Ice::Context& __ctx)
+    {
+        return findFaces(jpegFile, &__ctx);
+    }
+    
+private:
+
+    ::FriendDetector::Faces findFaces(const ::FriendDetector::File&, const ::Ice::Context*);
+    
+public:
+
     ::std::string recognizeFace(const ::FriendDetector::File& jpegFileOfFace)
     {
         return recognizeFace(jpegFileOfFace, 0);
@@ -488,6 +503,8 @@ public:
 
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::FriendDetector::File&, const ::Ice::Context*) = 0;
 
+    virtual ::FriendDetector::Faces findFaces(const ::FriendDetector::File&, const ::Ice::Context*) = 0;
+
     virtual ::std::string recognizeFace(const ::FriendDetector::File&, const ::Ice::Context*) = 0;
 
     virtual void learn(const ::FriendDetector::File&, const ::std::string&, const ::Ice::Context*) = 0;
@@ -514,6 +531,8 @@ public:
 
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::FriendDetector::File&, const ::Ice::Context*);
 
+    virtual ::FriendDetector::Faces findFaces(const ::FriendDetector::File&, const ::Ice::Context*);
+
     virtual ::std::string recognizeFace(const ::FriendDetector::File&, const ::Ice::Context*);
 
     virtual void learn(const ::FriendDetector::File&, const ::std::string&, const ::Ice::Context*);
@@ -539,6 +558,8 @@ class Recognizer : virtual public ::IceDelegate::FriendDetector::Recognizer,
 public:
 
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::FriendDetector::File&, const ::Ice::Context*);
+
+    virtual ::FriendDetector::Faces findFaces(const ::FriendDetector::File&, const ::Ice::Context*);
 
     virtual ::std::string recognizeFace(const ::FriendDetector::File&, const ::Ice::Context*);
 
@@ -572,6 +593,9 @@ public:
 
     virtual ::FriendDetector::Faces findFacesAndRecognizePeople(const ::FriendDetector::File&, const ::Ice::Current& = ::Ice::Current()) = 0;
     ::Ice::DispatchStatus ___findFacesAndRecognizePeople(::IceInternal::Incoming&, const ::Ice::Current&);
+
+    virtual ::FriendDetector::Faces findFaces(const ::FriendDetector::File&, const ::Ice::Current& = ::Ice::Current()) = 0;
+    ::Ice::DispatchStatus ___findFaces(::IceInternal::Incoming&, const ::Ice::Current&);
 
     virtual ::std::string recognizeFace(const ::FriendDetector::File&, const ::Ice::Current& = ::Ice::Current()) = 0;
     ::Ice::DispatchStatus ___recognizeFace(::IceInternal::Incoming&, const ::Ice::Current&);

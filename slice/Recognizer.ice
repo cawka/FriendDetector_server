@@ -35,6 +35,7 @@
  	interface Recognizer
  	{
  		Faces findFacesAndRecognizePeople( File jpegFile );
+ 		Faces findFaces( File jpegFile );
  		
  		string recognizeFace( File jpegFileOfFace );
  		

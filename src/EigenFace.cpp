@@ -10,6 +10,7 @@
 #include <fstream>
 
 #include <iterator>
+#include <algorithm>
 
 using namespace std;
 
@@ -17,7 +18,6 @@ using namespace std;
 
 const CvSize FACE_SIZE=cvSize( 64, 80 );
 
-const double EIGEN_THRESHOLD=21000.0;
 
 const string DROP_STATEMENT=
 	"DROP TABLE IF EXISTS "+EIGEN_TABLE;
@@ -36,7 +36,6 @@ EigenFace::EigenFace( )
 :  _nEigens( 0 )
 , _nTrainFaces( 0 )
 , _eigenValMat( NULL )
-, _projectedTrainFaceMat( NULL )
 , _pAvgTrainImg( NULL )
 , _eigenVectArr( NULL )
 {
@@ -62,6 +61,12 @@ EigenFace::EigenFace( )
 EigenFace::~EigenFace( )
 {
 	release( );
+}
+
+
+void EigenFace::reInit( )
+{
+	doPCA( );
 }
 
 
@@ -91,133 +96,6 @@ void EigenFace::initdb( )
 
 ///////////////////////////////////////////////////////////////////////////
 
-//void EigenFace::load( )
-//{
-//	// create a file-storage interface
-//	CvFileStorage *fileStorage = cvOpenFileStorage( _trainFile.c_str(), 0, CV_STORAGE_READ );
-//	if( !fileStorage )
-//	{
-//		throw std::runtime_error( "Cannot open trainFile ["+_trainFile+"] for reading" );
-//	}
-//
-//	int peopleCount=
-//				 cvReadIntByName( fileStorage, 0, "nPeopleCount", 0 );
-//
-//	_nEigens=
-//				 cvReadIntByName( fileStorage, 0, "nEigens", 0 );
-//	_nTrainFaces=
-//				 cvReadIntByName( fileStorage, 0, "nTrainFaces", 0 );
-//	_trainSet=
-//			(CvMat*)cvReadByName( fileStorage, 0, "trainPersonNumMat", NULL );
-//	_eigenValMat=
-//			(CvMat*)cvReadByName( fileStorage, 0, "eigenValMat", NULL );
-//	_projectedTrainFaceMat =
-//			(CvMat*)cvReadByName( fileStorage, 0, "projectedTrainFaceMat", NULL );
-//
-//	_pAvgTrainImg=
-//		 (IplImage*)cvReadByName( fileStorage, 0, "avgTrainImg", NULL );
-//
-//	_eigenVectArr = (IplImage**)cvAlloc( _nTrainFaces*sizeof(IplImage*) );
-//
-//	for( int i=0; i<_nEigens; i++ )
-//	{
-//		ostringstream os;
-//		os << "eigenVect_" << i;
-//
-//		_eigenVectArr[i] =
-//				(IplImage*)cvReadByName( fileStorage, 0, os.str().c_str() );
-//	}
-//
-//
-//	for( int i=0; i<peopleCount; i++ )
-//	{
-//		{
-//			ostringstream os;
-//			os << "name_" << i;
-//
-//			string name=cvReadStringByName( fileStorage, 0, os.str().c_str() );
-//			_peopleNames.push_back( name );
-//			_idByName[name]=i;
-//		}
-//
-//		{
-//			ostringstream os;
-//			os << "nameImages_" << i;
-//			_peopleImages.push_back( cvReadIntByName(fileStorage, 0, os.str().c_str(), 0) );
-//		}
-//
-//		{
-//			ostringstream os;
-//			os << "Number of faces for person #" << i << " in the database: " << _peopleImages[i];
-//			_log->debug( os.str() );
-//		}
-//	}
-//
-//	{
-//		ostringstream os;
-//		os << "Number of people in the database: " << peopleCount;
-//		_log->debug( os.str() );
-//	}
-//
-//
-//	// release the file-storage interface
-//	cvReleaseFileStorage( &fileStorage );
-//}
-
-//void EigenFace::store( )
-//{
-//	// create a file-storage interface
-//	CvFileStorage *fileStorage = cvOpenFileStorage( _trainFile.c_str(), 0, CV_STORAGE_WRITE );
-//	if( !fileStorage )
-//	{
-//		throw std::runtime_error( "Cannot open trainFile ["+_trainFile+"] for writing" );
-//	}
-//
-//	// store all the data
-//	cvWriteInt( fileStorage, "nEigens",      _nEigens );
-//	cvWriteInt( fileStorage, "nTrainFaces",  _nTrainFaces );
-//	cvWriteInt( fileStorage, "nPeopleCount", _peopleNames.size() );
-//
-//	if( _trainSet )
-//		cvWrite( fileStorage, "trainPersonNumMat",     _trainSet );
-//
-//	if( _eigenValMat )
-//		cvWrite( fileStorage, "eigenValMat",           _eigenValMat );
-//
-//	if( _projectedTrainFaceMat )
-//		cvWrite( fileStorage, "projectedTrainFaceMat", _projectedTrainFaceMat );
-//
-//	if( _pAvgTrainImg )
-//		cvWrite( fileStorage, "avgTrainImg",           _pAvgTrainImg );
-//
-//	for( int i=0; i<_nEigens; i++ )
-//	{
-//		ostringstream os;
-//		os << "eigenVect_" << i;
-//		cvWrite( fileStorage, os.str().c_str(), _eigenVectArr[i] );
-//	}
-//
-//	for( int i=0; i<_peopleNames.size(); i++ )
-//	{
-//		{
-//			ostringstream os;
-//			os << "name_" << i;
-//			cvWriteString( fileStorage, os.str().c_str(), _peopleNames[i].c_str() );
-//		}
-//
-//		{
-//			ostringstream os, out;
-//			os << "nameImages_" << i;
-//			cvWriteInt( fileStorage, os.str().c_str(), _peopleImages[i] );
-//		}
-//	}
-//
-//	// release the file-storage interface
-//	cvReleaseFileStorage( &fileStorage );
-//
-//	_log->debug( "PCA stored" );
-//}
-
 void EigenFace::release( )
 {
 	if( _nEigens==0 ) return; //nothing to release
@@ -231,8 +109,9 @@ void EigenFace::release( )
 	cvReleaseImage( &_pAvgTrainImg );
 	_pAvgTrainImg=NULL;
 
-	cvReleaseMat( &_projectedTrainFaceMat );
-	_projectedTrainFaceMat=NULL;
+	for( int i=0; i<_nTrainFaces; i++ )
+		delete [] _projectedTrainFaces[i];
+	_projectedTrainFaces.clear( );
 
 	cvReleaseMat( &_eigenValMat );
 	_eigenValMat=NULL;
@@ -251,13 +130,18 @@ string EigenFace::recognize( const IplImage *face )
 	assert( face!=NULL );
 
 	if( _nTrainFaces<3 ) return "";
-	
+
+	cvEqualizeHist( (CvArr*)face, (CvArr*)face );
+
 	//just to make sure we have standard face sizes. Overhead is minimal
 	IplImage *face_resized=cvCreateImage( FACE_SIZE, face->depth, face->nChannels );
 	cvResize( face, face_resized );
 
+	cvSaveImage( "test_face.jpeg", face_resized );
+
 	// project the test images onto the PCA subspace
-	float *projectedTestFace = (float*)cvAlloc( _nEigens*sizeof(float) );
+//	float *projectedTestFace = (float*)cvAlloc( _nEigens*sizeof(float) );
+	float *projectedTestFace = new float[_nEigens];
 
 	// project the test image onto the PCA subspace
 	cvEigenDecomposite(
@@ -273,17 +157,11 @@ string EigenFace::recognize( const IplImage *face )
 	int iNearest = findNearestNeighbor( projectedTestFace );
 	if( iNearest>=0 ) //there is some face that satisfies EIGEN_THRESHOLD
 	{
-		//truth    = personNumTruthMat->data.i[i];
 		name=_knownNames[ iNearest ];
-
-		//////////////////////////////////////////////////////////////
-
-//		assert( nearest<_peopleNames.size() );
-//
-//		name=_peopleNames[ nearest ];
 	}
 	
-	cvFree( &projectedTestFace );
+	delete [] projectedTestFace;
+	
 	cvReleaseImage( &face_resized );
 
 	return name;
@@ -292,7 +170,7 @@ string EigenFace::recognize( const IplImage *face )
 
 int EigenFace::findNearestNeighbor( const float *projectedFace ) const
 {
-	double leastDistSq = EIGEN_THRESHOLD;
+	double leastDistSq = DBL_MAX;//EIGEN_THRESHOLD;
 	int i, iTrain, iNearest = -1;
 
 	for( iTrain=0; iTrain<_nTrainFaces; iTrain++ )
@@ -302,15 +180,16 @@ int EigenFace::findNearestNeighbor( const float *projectedFace ) const
 		for( i=0; i<_nEigens; i++ )
 		{
 			float d_i =
-				projectedFace[i] -
-				_projectedTrainFaceMat->data.fl[iTrain*_nEigens + i];
+				projectedFace[i] - _projectedTrainFaces[iTrain][i];
 			
 			//distSq += d_i*d_i / eigenValMat->data.fl[i];  // Mahalanobis
-			distSq += d_i*d_i; // Euclidean
+//			distSq += d_i*d_i; // Euclidean
+			distSq += abs( d_i );
 		}
 
-		distSq = sqrt( distSq );
-		
+//		distSq = sqrt( distSq ) / _nEigens;
+		distSq /= _nEigens;
+
 		if( distSq < leastDistSq )
 		{
 			leastDistSq = distSq;
@@ -320,19 +199,22 @@ int EigenFace::findNearestNeighbor( const float *projectedFace ) const
 		///////////////////////////////////////////////////////////
 
 		{
+			int points=(int)max( 0.0, 100 - round( distSq * 0.2f ) );
+
 			ostringstream os;
 			os << "test face #" << iTrain << " (";
 			os << _knownNames[ iTrain ];
 //			os << _peopleNames[ _trainSet->data.i[ iTrain ] ];
-			os << "), euclidean distance: " << distSq;
+			os << "), raw distance: " << distSq;
+			os << ", score: " << points;
 			_log->debug( os.str() );
 		}
 
-		{
-			ostringstream os;
-			os << "current threshold: " << leastDistSq;
-			_log->debug( os.str() );
-		}
+//		{
+//			ostringstream os;
+//			os << "current threshold: " << leastDistSq;
+//			_log->debug( os.str() );
+//		}
 	}
 
 	return iNearest;
@@ -375,20 +257,6 @@ void EigenFace::learn( const IplImage *face, const string &name )
         cerr << p.var_info << endl; // print out the variable that caused the error
     }
 
-//	map<string,int>::const_iterator i=_idByName.find( name );
-//	if( i==_idByName.end() )
-//	{
-//		//create a new person
-//		int id=_peopleNames.size( );
-//		_peopleNames.push_back( name );
-//		_idByName[ name ]=id;
-//
-//		_peopleImages.push_back( 0 );
-//	}
-//
-//	int id=_idByName[ name ];
-//	_peopleImages[ id ]++;
-
 	doPCA( );
 }
 
@@ -419,22 +287,7 @@ void EigenFace::doPCA( )
 		_nEigens =  _nTrainFaces-1;
 
 		IplImage **faceImgArr = (IplImage **)cvAlloc( _nTrainFaces*sizeof(IplImage *) );
-//		_trainSet=cvCreateMat( 1, _nTrainFaces, CV_32SC1 );
-		
-//		for( int i=0; i<_peopleNames.size(); i++ )
-//		{
-//			for( int j=0; j<_peopleImages[i]; j++ )
-//			{
-//				*(_trainSet->data.i+abs_index)=i;
-//
-//				ostringstream filename;
-//				filename << STORAGE_DIR << i << "_" << j << ".png";
-//				_log->debug( "Trying to load image ["+filename.str()+"]" );
-//				faceImgArr[abs_index] = cvLoadImage( filename.str().c_str(), CV_LOAD_IMAGE_GRAYSCALE );
-//
-//				abs_index++;
-//			}
-//		}
+
 		int abs_index=0;
 		q.open( 100, "SELECT id :#1<int>, name :#2<char[255]> FROM eigen ORDER BY name,id", DB );
 		while( !q.eof() )
@@ -443,7 +296,6 @@ void EigenFace::doPCA( )
 			string name;
 			q >> id >> name;
 
-//			*(_trainSet->data.i+abs_index)=i;
 			_knownNames.push_back( name );
 			
 			ostringstream filename;
@@ -451,6 +303,8 @@ void EigenFace::doPCA( )
 			_log->debug( "Trying to load image ["+filename.str()+"]" );
 
 			faceImgArr[abs_index] = cvLoadImage( filename.str().c_str(), CV_LOAD_IMAGE_GRAYSCALE );
+			cvEqualizeHist( faceImgArr[abs_index], faceImgArr[abs_index] );
+			
 			if( faceImgArr[abs_index]==0 )
 			{
 				cerr << "Database corruption!!!" << endl;
@@ -475,18 +329,6 @@ void EigenFace::doPCA( )
 		// set the PCA termination criterion
 		calcLimit = cvTermCriteria( CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, _nEigens, 0.01 );
 
-//		_log->debug( "running cvCalcEigenObjects" );
-
-//		for( int i=0; i<_nTrainFaces; i++ )
-//		{
-//			ostringstream os;
-////			os << "Face #" << i << " points to " << (long)((void*)faceImgArr[i]);
-//
-//	//		os << endl << ""
-//			_log->debug( os.str() );
-//	//		cvReleaseImage( &faceImgArr[i] );
-//		}
-
 		// compute average image, eigenvalues, and eigenvectors
 		cvCalcEigenObjects(
 			_nTrainFaces,
@@ -499,12 +341,12 @@ void EigenFace::doPCA( )
 			_pAvgTrainImg,
 			_eigenValMat->data.fl );
 
-		cvNormalize( _eigenValMat, _eigenValMat, 1, 0, CV_L1, 0 );
-
-		ostringstream os;
-		os << "Real eps: " << calcLimit.epsilon << ", ";
-		os << " max_iter: " << calcLimit.max_iter;
-		_log->debug( os.str() );
+//		cvNormalize( _eigenValMat, _eigenValMat, 1, 0, CV_L1, 0 );
+		
+//		ostringstream os;
+//		os << "Real eps: " << calcLimit.epsilon << ", ";
+//		os << " max_iter: " << calcLimit.max_iter;
+//		_log->debug( os.str() );
 
 		if( calcLimit.max_iter<_nEigens )
 		{
@@ -517,26 +359,39 @@ void EigenFace::doPCA( )
 			_nEigens=calcLimit.max_iter;
 		}
 
-		_log->debug( "Eigen space recalculated" );
+//		_log->debug( "Eigen space recalculated" );
 
 
 		//////////////////////////////////////////////////////////////////////
 		// project the training images onto the PCA subspace
 
-		_projectedTrainFaceMat = cvCreateMat( _nTrainFaces, _nEigens, CV_32FC1 );
-		int offset=_projectedTrainFaceMat->step / sizeof(float);
+//		_projectedTrainFaceMat = cvCreateMat( _nTrainFaces, _nEigens, CV_32FC1 );
+//		int offset=_projectedTrainFaceMat->step / sizeof(float);
+
+//		cerr << _nTrainFaces << endl;
+//		cerr << _nEigens << endl;
+//		cerr << _projectedTrainFaceMat->step << endl;
+//		cerr << sizeof(float) << endl;
+
+
 		for( int i=0; i < _nTrainFaces; i++ )
 		{
-			//int offset = i * nEigens;
+			float *coeffs=new float[_nEigens];
+
+			ostringstream ff;
+			ff << "test_" << i << ".jpeg";
+			cvSaveImage( ff.str().c_str(), faceImgArr[i] );
+
 			cvEigenDecomposite(
 								faceImgArr[i],
 								_nEigens,
 								_eigenVectArr,
 								0, 0,
 								_pAvgTrainImg,
-								//projectedTrainFaceMat->data.fl + i*nEigens);
-								_projectedTrainFaceMat->data.fl + i * offset );
+								coeffs );
+			_projectedTrainFaces.push_back( coeffs );
 		}
+
 
 		//////////////////////////////////////////////////////////////////////
 		// release images
@@ -555,57 +410,10 @@ void EigenFace::doPCA( )
     }
 }
 
-
-//shared_ptr<FacePicturesWithNames> EigenFace::getTrainSet( )
-//{
-//	shared_ptr<FacePicturesWithNames> ret=shared_ptr<FacePicturesWithNames>( new FacePicturesWithNames() );
-//
-//	otl_stream q( 100, "SELECT id :#1<int>, name :#2<char[255]> FROM eigen ORDER BY name,id", DB );
-//	while( !q.eof() )
-//	{
-//		FacePictureWithName value;
-//		q >> value.id >> value.name;
-//
-//		ostringstream filename;
-//		filename << STORAGE_DIR << value.id  << ".png";
-//
-//		ifstream f( filename.str().c_str() );
-//		f >> std::noskipws;
-//
-//		std::copy( istream_iterator<char>(f), istream_iterator<char>(),
-//				 std::back_inserter(value.jpegFileOfFace) );
-//
-//		ret->push_back( value );
-//	}
-//
-////	int abs_index=0;
-////	for( int i=0; i<_peopleNames.size(); i++ )
-////	{
-////		for( int j=0; j<_peopleImages[i]; j++ )
-////		{
-////			FacePictureWithName value;
-////			value.id=abs_index;
-////			value.name=_peopleNames[i];
-////
-////			ostringstream filename;
-////			filename << STORAGE_DIR << i << "_" << j << ".png";
-//////			_log->debug( "Trying to load image ["+filename.str()+"]" );
-////			ifstream f( filename.str().c_str() );
-////			f >> std::noskipws;
-////
-////			std::copy( istream_iterator<char>(f), istream_iterator<char>(),
-////					 std::back_inserter(value.jpegFileOfFace) );
-////
-////			ret->push_back( value );
-////
-////			abs_index++;
-////		}
-////	}
-//
-//	return ret;
-//}
-
-void   EigenFace::reInit( )
+string EigenFace::getAvgFace( )
 {
-	doPCA( );
+	if( _pAvgTrainImg==NULL ) return "";
+
+	cvSaveImage( "avgFace.jpeg", _pAvgTrainImg );
+	return "avgFace.jpeg";
 }

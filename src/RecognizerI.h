@@ -23,6 +23,9 @@ public:
     virtual Faces findFacesAndRecognizePeople( const File &jpegFile,
 										       const Current& = Current());
 
+    virtual Faces findFaces( const File &jpegFile,
+							 const Current& = Current() );
+
     virtual string recognizeFace( const File& jpegFileOfFace,
 								  const Current& = Current());
 
@@ -33,6 +36,9 @@ public:
 	virtual FacePicturesWithNames getTrainSet( const Current& =Current( ) );
 
 	virtual void unLearn( Int, const Current& =Current( ) );
+
+private:
+	Faces findFacesAndOrRecognize( const File& jpegFile, bool recognize=true );
 
 private:
 	CvSize _min_size;

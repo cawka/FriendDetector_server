@@ -31,6 +31,8 @@ public:
 
 	virtual void   reInit( );
 
+	string getAvgFace( );
+
 //	virtual shared_ptr</FacePicturesWithNames> getTrainSet( );
 
 protected:
@@ -52,7 +54,8 @@ private:
 	int    _nEigens;
 	int    _nTrainFaces;
 	CvMat *_eigenValMat;			// eigenvalues
-	CvMat *_projectedTrainFaceMat;	// projected training faces
+//	CvMat *_projectedTrainFaceMat;	// projected training faces
+	vector<float*> _projectedTrainFaces; //eigen coefficients for all train faces
 
 	IplImage  *_pAvgTrainImg; // the average image
 	IplImage **_eigenVectArr; // eigenvectors
@@ -61,7 +64,6 @@ private:
 //	map<string,int> _idByName;    //to make person id search faster
 
 //	vector<int>    _peopleImages; //number of images of a person
-
 
 	static log4cxx::LoggerPtr _log;
 };

@@ -31,6 +31,8 @@
 
 static const ::std::string __FriendDetector__Recognizer__findFacesAndRecognizePeople_name = "findFacesAndRecognizePeople";
 
+static const ::std::string __FriendDetector__Recognizer__findFaces_name = "findFaces";
+
 static const ::std::string __FriendDetector__Recognizer__recognizeFace_name = "recognizeFace";
 
 static const ::std::string __FriendDetector__Recognizer__learn_name = "learn";
@@ -424,6 +426,34 @@ IceProxy::FriendDetector::Recognizer::findFacesAndRecognizePeople(const ::Friend
     }
 }
 
+::FriendDetector::Faces
+IceProxy::FriendDetector::Recognizer::findFaces(const ::FriendDetector::File& jpegFile, const ::Ice::Context* __ctx)
+{
+    int __cnt = 0;
+    while(true)
+    {
+        ::IceInternal::Handle< ::IceDelegate::Ice::Object> __delBase;
+        try
+        {
+#if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600) // C++Builder 2009 compiler bug
+            IceUtil::DummyBCC dummy;
+#endif
+            __checkTwowayOnly(__FriendDetector__Recognizer__findFaces_name);
+            __delBase = __getDelegate(false);
+            ::IceDelegate::FriendDetector::Recognizer* __del = dynamic_cast< ::IceDelegate::FriendDetector::Recognizer*>(__delBase.get());
+            return __del->findFaces(jpegFile, __ctx);
+        }
+        catch(const ::IceInternal::LocalExceptionWrapper& __ex)
+        {
+            __handleExceptionWrapper(__delBase, __ex, 0);
+        }
+        catch(const ::Ice::LocalException& __ex)
+        {
+            __handleException(__delBase, __ex, 0, __cnt);
+        }
+    }
+}
+
 ::std::string
 IceProxy::FriendDetector::Recognizer::recognizeFace(const ::FriendDetector::File& jpegFileOfFace, const ::Ice::Context* __ctx)
 {
@@ -564,6 +594,54 @@ IceProxy::FriendDetector::Recognizer::__newInstance() const
 IceDelegateM::FriendDetector::Recognizer::findFacesAndRecognizePeople(const ::FriendDetector::File& jpegFile, const ::Ice::Context* __context)
 {
     ::IceInternal::Outgoing __og(__handler.get(), __FriendDetector__Recognizer__findFacesAndRecognizePeople_name, ::Ice::Normal, __context);
+    try
+    {
+        ::IceInternal::BasicStream* __os = __og.os();
+        if(jpegFile.size() == 0)
+        {
+            __os->writeSize(0);
+        }
+        else
+        {
+            __os->write(&jpegFile[0], &jpegFile[0] + jpegFile.size());
+        }
+    }
+    catch(const ::Ice::LocalException& __ex)
+    {
+        __og.abort(__ex);
+    }
+    bool __ok = __og.invoke();
+    ::FriendDetector::Faces __ret;
+    try
+    {
+        if(!__ok)
+        {
+            try
+            {
+                __og.throwUserException();
+            }
+            catch(const ::Ice::UserException& __ex)
+            {
+                ::Ice::UnknownUserException __uue(__FILE__, __LINE__, __ex.ice_name());
+                throw __uue;
+            }
+        }
+        ::IceInternal::BasicStream* __is = __og.is();
+        __is->startReadEncaps();
+        ::FriendDetector::__readFaces(__is, __ret);
+        __is->endReadEncaps();
+        return __ret;
+    }
+    catch(const ::Ice::LocalException& __ex)
+    {
+        throw ::IceInternal::LocalExceptionWrapper(__ex, false);
+    }
+}
+
+::FriendDetector::Faces
+IceDelegateM::FriendDetector::Recognizer::findFaces(const ::FriendDetector::File& jpegFile, const ::Ice::Context* __context)
+{
+    ::IceInternal::Outgoing __og(__handler.get(), __FriendDetector__Recognizer__findFaces_name, ::Ice::Normal, __context);
     try
     {
         ::IceInternal::BasicStream* __os = __og.os();
@@ -808,6 +886,74 @@ IceDelegateD::FriendDetector::Recognizer::findFacesAndRecognizePeople(const ::Fr
     
     ::Ice::Current __current;
     __initCurrent(__current, __FriendDetector__Recognizer__findFacesAndRecognizePeople_name, ::Ice::Normal, __context);
+    ::FriendDetector::Faces __result;
+    try
+    {
+        _DirectI __direct(__result, jpegFile, __current);
+        try
+        {
+            __direct.servant()->__collocDispatch(__direct);
+        }
+        catch(...)
+        {
+            __direct.destroy();
+            throw;
+        }
+        __direct.destroy();
+    }
+    catch(const ::Ice::SystemException&)
+    {
+        throw;
+    }
+    catch(const ::IceInternal::LocalExceptionWrapper&)
+    {
+        throw;
+    }
+    catch(const ::std::exception& __ex)
+    {
+        ::IceInternal::LocalExceptionWrapper::throwWrapper(__ex);
+    }
+    catch(...)
+    {
+        throw ::IceInternal::LocalExceptionWrapper(::Ice::UnknownException(__FILE__, __LINE__, "unknown c++ exception"), false);
+    }
+    return __result;
+}
+
+::FriendDetector::Faces
+IceDelegateD::FriendDetector::Recognizer::findFaces(const ::FriendDetector::File& jpegFile, const ::Ice::Context* __context)
+{
+    class _DirectI : public ::IceInternal::Direct
+    {
+    public:
+
+        _DirectI(::FriendDetector::Faces& __result, const ::FriendDetector::File& jpegFile, const ::Ice::Current& __current) : 
+            ::IceInternal::Direct(__current),
+            _result(__result),
+            _m_jpegFile(jpegFile)
+        {
+        }
+        
+        virtual ::Ice::DispatchStatus
+        run(::Ice::Object* object)
+        {
+            ::FriendDetector::Recognizer* servant = dynamic_cast< ::FriendDetector::Recognizer*>(object);
+            if(!servant)
+            {
+                throw ::Ice::OperationNotExistException(__FILE__, __LINE__, _current.id, _current.facet, _current.operation);
+            }
+            _result = servant->findFaces(_m_jpegFile, _current);
+            return ::Ice::DispatchOK;
+        }
+        
+    private:
+        
+        ::FriendDetector::Faces& _result;
+        const ::FriendDetector::File& _m_jpegFile;
+    };
+    
+    ::Ice::Current __current;
+    __initCurrent(__current, __FriendDetector__Recognizer__findFaces_name, ::Ice::Normal, __context);
     ::FriendDetector::Faces __result;
     try
     {
@@ -1168,6 +1314,30 @@ FriendDetector::Recognizer::___findFacesAndRecognizePeople(::IceInternal::Incomi
 }
 
 ::Ice::DispatchStatus
+FriendDetector::Recognizer::___findFaces(::IceInternal::Incoming& __inS, const ::Ice::Current& __current)
+{
+    __checkMode(::Ice::Normal, __current.mode);
+    ::IceInternal::BasicStream* __is = __inS.is();
+    __is->startReadEncaps();
+    ::FriendDetector::File jpegFile;
+    ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*> ___jpegFile;
+    __is->read(___jpegFile);
+    ::std::vector< ::Ice::Byte>(___jpegFile.first, ___jpegFile.second).swap(jpegFile);
+    __is->endReadEncaps();
+    ::IceInternal::BasicStream* __os = __inS.os();
+    ::FriendDetector::Faces __ret = findFaces(jpegFile, __current);
+    if(__ret.size() == 0)
+    {
+        __os->writeSize(0);
+    }
+    else
+    {
+        ::FriendDetector::__writeFaces(__os, &__ret[0], &__ret[0] + __ret.size());
+    }
+    return ::Ice::DispatchOK;
+}
+
+::Ice::DispatchStatus
 FriendDetector::Recognizer::___recognizeFace(::IceInternal::Incoming& __inS, const ::Ice::Current& __current)
 {
     __checkMode(::Ice::Normal, __current.mode);
@@ -1234,6 +1404,7 @@ FriendDetector::Recognizer::___unLearn(::IceInternal::Incoming& __inS, const ::I
 
 static ::std::string __FriendDetector__Recognizer_all[] =
 {
+    "findFaces",
     "findFacesAndRecognizePeople",
     "getTrainSet",
     "ice_id",
@@ -1248,7 +1419,7 @@ static ::std::string __FriendDetector__Recognizer_all[] =
 ::Ice::DispatchStatus
 FriendDetector::Recognizer::__dispatch(::IceInternal::Incoming& in, const ::Ice::Current& current)
 {
-    ::std::pair< ::std::string*, ::std::string*> r = ::std::equal_range(__FriendDetector__Recognizer_all, __FriendDetector__Recognizer_all + 9, current.operation);
+    ::std::pair< ::std::string*, ::std::string*> r = ::std::equal_range(__FriendDetector__Recognizer_all, __FriendDetector__Recognizer_all + 10, current.operation);
     if(r.first == r.second)
     {
         throw ::Ice::OperationNotExistException(__FILE__, __LINE__, current.id, current.facet, current.operation);
@@ -1258,37 +1429,41 @@ FriendDetector::Recognizer::__dispatch(::IceInternal::Incoming& in, const ::Ice:
     {
         case 0:
         {
-            return ___findFacesAndRecognizePeople(in, current);
+            return ___findFaces(in, current);
         }
         case 1:
         {
-            return ___getTrainSet(in, current);
+            return ___findFacesAndRecognizePeople(in, current);
         }
         case 2:
         {
-            return ___ice_id(in, current);
+            return ___getTrainSet(in, current);
         }
         case 3:
         {
-            return ___ice_ids(in, current);
+            return ___ice_id(in, current);
         }
         case 4:
         {
-            return ___ice_isA(in, current);
+            return ___ice_ids(in, current);
         }
         case 5:
         {
-            return ___ice_ping(in, current);
+            return ___ice_isA(in, current);
         }
         case 6:
         {
-            return ___learn(in, current);
+            return ___ice_ping(in, current);
         }
         case 7:
         {
-            return ___recognizeFace(in, current);
+            return ___learn(in, current);
         }
         case 8:
+        {
+            return ___recognizeFace(in, current);
+        }
+        case 9:
         {
             return ___unLearn(in, current);
         }
