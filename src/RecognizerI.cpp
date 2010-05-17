@@ -180,12 +180,21 @@ void RecognizerI::learn( const File& jpegFileOfFace,
 	cvReleaseImage( &image );
 }
 
-FacePicturesWithNames RecognizerI::getTrainSet( const Current& )
+int RecognizerI::getTrainSetSize( const Current& )
+{
+	otl_stream q( 1, "SELECT count(*) :#1<int> FROM eigen", DB );
+
+	int count;
+	q >> count;
+
+	return count+1;	
+}
+
+FacePictureWithName RecognizerI::getTrainSetFace( int num, const Current& )
 {
 	_log->debug( "received request `getTrainSet`" );
 
-	FacePicturesWithNames ret;
-
+	if( num==0 )
 	{
 		FacePictureWithName value;
 		value.id=-1;
@@ -198,11 +207,12 @@ FacePicturesWithNames RecognizerI::getTrainSet( const Current& )
 		std::copy( istream_iterator<char>(f), istream_iterator<char>(),
 				 std::back_inserter(value.jpegFileOfFace) );
 
-		ret.push_back( value );
+		return value;
 	}
 
-	otl_stream q( 100, "SELECT id :#1<int>, name :#2<char[255]> FROM eigen ORDER BY name,id", DB );
-	while( !q.eof() )
+	otl_stream q( 1, "SELECT id :#1<int>, name :#2<char[255]> FROM eigen ORDER BY name,id LIMIT 1 OFFSET :offset<int>", DB );
+	q << num;
+	if( !q.eof() )
 	{
 		FacePictureWithName value;
 		q >> value.id >> value.name;
@@ -216,10 +226,10 @@ FacePicturesWithNames RecognizerI::getTrainSet( const Current& )
 		std::copy( istream_iterator<char>(f), istream_iterator<char>(),
 				 std::back_inserter(value.jpegFileOfFace) );
 
-		ret.push_back( value );
+		return value;
 	}
-
-	return ret;
+	else
+		return FacePictureWithName( );
 }
 
 void RecognizerI::unLearn( Int id, const Current& )

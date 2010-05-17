@@ -33,7 +33,8 @@ public:
 						const string &name, const Current& = Current() );
 
 
-	virtual FacePicturesWithNames getTrainSet( const Current& =Current( ) );
+	virtual int getTrainSetSize( const Current& =Current( ) );
+	virtual FacePictureWithName getTrainSetFace( int num, const Current& =Current( ) );
 
 	virtual void unLearn( Int, const Current& =Current( ) );
 

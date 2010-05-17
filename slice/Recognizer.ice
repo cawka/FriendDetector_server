@@ -41,7 +41,8 @@
  		
  		void learn( File jpegFileOfFace, string name );
  		
- 		FacePicturesWithNames getTrainSet( );
+ 		int getTrainSetSize( );
+ 		FacePictureWithName getTrainSetFace( int num );
  		
  		void unLearn( int id );
  	};

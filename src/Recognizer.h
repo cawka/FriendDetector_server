@@ -258,18 +258,33 @@ private:
     
 public:
 
-    ::FriendDetector::FacePicturesWithNames getTrainSet()
+    ::Ice::Int getTrainSetSize()
     {
-        return getTrainSet(0);
+        return getTrainSetSize(0);
     }
-    ::FriendDetector::FacePicturesWithNames getTrainSet(const ::Ice::Context& __ctx)
+    ::Ice::Int getTrainSetSize(const ::Ice::Context& __ctx)
     {
-        return getTrainSet(&__ctx);
+        return getTrainSetSize(&__ctx);
     }
     
 private:
 
-    ::FriendDetector::FacePicturesWithNames getTrainSet(const ::Ice::Context*);
+    ::Ice::Int getTrainSetSize(const ::Ice::Context*);
+    
+public:
+
+    ::FriendDetector::FacePictureWithName getTrainSetFace(::Ice::Int num)
+    {
+        return getTrainSetFace(num, 0);
+    }
+    ::FriendDetector::FacePictureWithName getTrainSetFace(::Ice::Int num, const ::Ice::Context& __ctx)
+    {
+        return getTrainSetFace(num, &__ctx);
+    }
+    
+private:
+
+    ::FriendDetector::FacePictureWithName getTrainSetFace(::Ice::Int, const ::Ice::Context*);
     
 public:
 
@@ -509,7 +524,9 @@ public:
 
     virtual void learn(const ::FriendDetector::File&, const ::std::string&, const ::Ice::Context*) = 0;
 
-    virtual ::FriendDetector::FacePicturesWithNames getTrainSet(const ::Ice::Context*) = 0;
+    virtual ::Ice::Int getTrainSetSize(const ::Ice::Context*) = 0;
+
+    virtual ::FriendDetector::FacePictureWithName getTrainSetFace(::Ice::Int, const ::Ice::Context*) = 0;
 
     virtual void unLearn(::Ice::Int, const ::Ice::Context*) = 0;
 };
@@ -537,7 +554,9 @@ public:
 
     virtual void learn(const ::FriendDetector::File&, const ::std::string&, const ::Ice::Context*);
 
-    virtual ::FriendDetector::FacePicturesWithNames getTrainSet(const ::Ice::Context*);
+    virtual ::Ice::Int getTrainSetSize(const ::Ice::Context*);
+
+    virtual ::FriendDetector::FacePictureWithName getTrainSetFace(::Ice::Int, const ::Ice::Context*);
 
     virtual void unLearn(::Ice::Int, const ::Ice::Context*);
 };
@@ -565,7 +584,9 @@ public:
 
     virtual void learn(const ::FriendDetector::File&, const ::std::string&, const ::Ice::Context*);
 
-    virtual ::FriendDetector::FacePicturesWithNames getTrainSet(const ::Ice::Context*);
+    virtual ::Ice::Int getTrainSetSize(const ::Ice::Context*);
+
+    virtual ::FriendDetector::FacePictureWithName getTrainSetFace(::Ice::Int, const ::Ice::Context*);
 
     virtual void unLearn(::Ice::Int, const ::Ice::Context*);
 };
@@ -603,8 +624,11 @@ public:
     virtual void learn(const ::FriendDetector::File&, const ::std::string&, const ::Ice::Current& = ::Ice::Current()) = 0;
     ::Ice::DispatchStatus ___learn(::IceInternal::Incoming&, const ::Ice::Current&);
 
-    virtual ::FriendDetector::FacePicturesWithNames getTrainSet(const ::Ice::Current& = ::Ice::Current()) = 0;
-    ::Ice::DispatchStatus ___getTrainSet(::IceInternal::Incoming&, const ::Ice::Current&);
+    virtual ::Ice::Int getTrainSetSize(const ::Ice::Current& = ::Ice::Current()) = 0;
+    ::Ice::DispatchStatus ___getTrainSetSize(::IceInternal::Incoming&, const ::Ice::Current&);
+
+    virtual ::FriendDetector::FacePictureWithName getTrainSetFace(::Ice::Int, const ::Ice::Current& = ::Ice::Current()) = 0;
+    ::Ice::DispatchStatus ___getTrainSetFace(::IceInternal::Incoming&, const ::Ice::Current&);
 
     virtual void unLearn(::Ice::Int, const ::Ice::Current& = ::Ice::Current()) = 0;
     ::Ice::DispatchStatus ___unLearn(::IceInternal::Incoming&, const ::Ice::Current&);
