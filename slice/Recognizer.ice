@@ -31,20 +31,25 @@
  	};
  	
  	sequence<FacePictureWithName> FacePicturesWithNames;
- 	
+ 
+	struct UID
+	{
+		string facebook;
+	};
+	
  	interface Recognizer
  	{
- 		Faces findFacesAndRecognizePeople( File jpegFile );
- 		Faces findFaces( File jpegFile );
+ 		Faces findFacesAndRecognizePeople( File jpegFile, UID userid );
+ 		Faces findFaces( File jpegFile, UID userid );
  		
- 		string recognizeFace( File jpegFileOfFace );
+ 		string recognizeFace( File jpegFileOfFace, UID userid );
  		
- 		void learn( File jpegFileOfFace, string name );
+ 		void learn( File jpegFileOfFace, string name, UID userid );
  		
- 		int getTrainSetSize( );
- 		FacePictureWithName getTrainSetFace( int num );
+ 		int getTrainSetSize( UID userid );
+ 		FacePictureWithName getTrainSetFace( int num, UID userid );
  		
- 		void unLearn( int id );
+ 		void unLearn( int id, UID userid );
  	};
  };
  

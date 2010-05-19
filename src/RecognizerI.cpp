@@ -132,7 +132,7 @@ Faces RecognizerI::findFacesAndOrRecognize( const File& jpegFile, bool recognize
 }
 
 
-Faces RecognizerI::findFacesAndRecognizePeople( const File& jpegFile, const Current& )
+Faces RecognizerI::findFacesAndRecognizePeople( const File& jpegFile, const UID &userid, const Current& )
 {
 	_log->debug( "received request `findFacesAndRecognizePeople`" );
 
@@ -140,7 +140,7 @@ Faces RecognizerI::findFacesAndRecognizePeople( const File& jpegFile, const Curr
 }
 
 
-Faces RecognizerI::findFaces( const File &jpegFile, const Current& )
+Faces RecognizerI::findFaces( const File &jpegFile, const UID &userid, const Current& )
 {
 	_log->debug( "received request `findFaces`" );
 
@@ -148,7 +148,7 @@ Faces RecognizerI::findFaces( const File &jpegFile, const Current& )
 }
 
 
-string RecognizerI::recognizeFace( const File& jpegFileOfFace, const Current& )
+string RecognizerI::recognizeFace( const File& jpegFileOfFace, const UID &userid, const Current& )
 {
 	_log->debug( "received request `recognizeFace`" );
 
@@ -166,7 +166,7 @@ string RecognizerI::recognizeFace( const File& jpegFileOfFace, const Current& )
 }
 
 void RecognizerI::learn( const File& jpegFileOfFace,
-	   const string &name,	const Current& )
+	   const string &name,	const UID &userid, const Current& )
 {
 	_log->debug( "received request `learn`" );
 
@@ -180,7 +180,7 @@ void RecognizerI::learn( const File& jpegFileOfFace,
 	cvReleaseImage( &image );
 }
 
-int RecognizerI::getTrainSetSize( const Current& )
+int RecognizerI::getTrainSetSize( const UID &userid, const Current& )
 {
 	otl_stream q( 1, "SELECT count(*) :#1<int> FROM eigen", DB );
 
@@ -190,7 +190,7 @@ int RecognizerI::getTrainSetSize( const Current& )
 	return count+1;	
 }
 
-FacePictureWithName RecognizerI::getTrainSetFace( int num, const Current& )
+FacePictureWithName RecognizerI::getTrainSetFace( int num, const UID &userid, const Current& )
 {
 	_log->debug( "received request `getTrainSet`" );
 
@@ -232,7 +232,7 @@ FacePictureWithName RecognizerI::getTrainSetFace( int num, const Current& )
 		return FacePictureWithName( );
 }
 
-void RecognizerI::unLearn( Int id, const Current& )
+void RecognizerI::unLearn( Int id, const UID &userid, const Current& )
 {
 	_log->debug( "received request `unLearn`" );
 	if( id<=0 ) return;

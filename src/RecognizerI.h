@@ -21,22 +21,27 @@ public:
 	virtual ~RecognizerI( );
 
     virtual Faces findFacesAndRecognizePeople( const File &jpegFile,
+											   const UID &userid,
 										       const Current& = Current());
 
     virtual Faces findFaces( const File &jpegFile,
+							 const UID &userid,
 							 const Current& = Current() );
 
     virtual string recognizeFace( const File& jpegFileOfFace,
+								  const UID &userid,
 								  const Current& = Current());
 
     virtual void learn( const File& jpegFileOfFace,
-						const string &name, const Current& = Current() );
+						const string &name, 
+						const UID &userid,
+						const Current& = Current() );
 
 
-	virtual int getTrainSetSize( const Current& =Current( ) );
-	virtual FacePictureWithName getTrainSetFace( int num, const Current& =Current( ) );
+	virtual int getTrainSetSize( const UID &userid, const Current& =Current( ) );
+	virtual FacePictureWithName getTrainSetFace( int num, const UID &userid, const Current& =Current( ) );
 
-	virtual void unLearn( Int, const Current& =Current( ) );
+	virtual void unLearn( Int, const UID &userid, const Current& =Current( ) );
 
 private:
 	Faces findFacesAndOrRecognize( const File& jpegFile, bool recognize=true );
